@@ -1,4 +1,4 @@
-# 14-03projectCSCI3308
+# PDF.ai
 Group 03 Project for CSCI3308
 The ReadMe.md should include the following:
 
