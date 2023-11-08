@@ -1,22 +1,21 @@
 <%- include ('../partials/header') %>
 <%- include ('../partials/menu') %>
-<div class="col"><%- include ('../partials/message') %></div>
 
 <main>
      <!-- form for styled with bootstrap -->
-    <div class="container">
-      <h2>Login</h2>
-      <!-- api call -->
-      <form action="/login" method="post">
+     <div class="container mx-auto d-flex justify-content-center align-items-center" style="height: 75vh;">
+        <!-- api call -->
+      <form action="/login" method="post" style="text-align: center;">
+        <legend>Login</legend>
         <!-- Email part of form -->
         <div class="form-outline mb-4">
           <input type="email" id="email" class="form-control" />
-          <label class="form-label" for="form2Example1">Email</label>
+          <label class="form-label" for="login">Email</label>
         </div>
         <!-- Password part of form -->
         <div class="form-outline mb-4">
-          <input type="password" id="password" class="form-control" />
-          <label class="form-label" for="password">Password</label>
+          <input type="password" id="password" class="form-control"/>
+          <label class="form-label" for="login">Password</label>
         </div>
           <!-- Commented out code is another submit button. Ensure of functionality of current button. -->
           <!-- <input type="submit" style="background-color:CadetBlue" value="Login"> -->

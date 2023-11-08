@@ -1,13 +1,12 @@
 <%- include ('../partials/header') %>
 <%- include ('../partials/menu') %>
-<div class="col"><%- include ('../partials/message') %></div>
 
 <main>
      <!-- form for styled with bootstrap -->
-    <div class="container">
-      <h2>Register</h2>
-      <!-- api call -->
-      <form action="/register" method="post">
+     <div class="container mx-auto d-flex justify-content-center align-items-center" style="height: 75vh;">
+        <!-- api call -->
+      <form action="/register" method="post" style="text-align: center;">
+        <legend>Register</legend>
         <!-- Email part of form -->
         <div class="form-outline mb-4">
           <input type="email" id="email" class="form-control" />
