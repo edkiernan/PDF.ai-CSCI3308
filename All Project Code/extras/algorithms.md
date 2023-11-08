@@ -67,6 +67,37 @@ app.get('/get-messages', (req, res) => {
 });
 ```
 
+we also need a /send-message endpoint
+```javascript
+// /send-message route handler
+app.post('/send-message', (req, res) => {
+    const { author, textContent } = req.body;
+
+    // Create a new message object
+    const newMessage = {
+        isBot: false,
+        author,
+        textContent,
+        messageId: (messages.length + 1).toString()
+    };
+
+    // Add the new message to the messages array
+    messages.push(newMessage);
+
+    res.status(201).json(newMessage); // Return 201 status code with the new message object
+    // response
+    // {
+    //     status: 201,
+    //     message: {
+    //         ...
+    //     }
+    // }
+
+    // get ai generated response 
+    fetchChatCompletion(textContent, pdfPageText, openAiChatHistory)
+});
+```
+
 ```javascript
 // message.js
 
@@ -90,6 +121,121 @@ export default function message(props) {
     `;
 
     return html;
+}
+
+```
+
+### Required arrays to store message history
+```javascript
+let messages = [
+    `
+    <div class="${containerClass}">
+        <div class="${messageClass}" id="${props.messageId}">
+            <div class="author">
+                ${authorText}
+            </div>
+            <div class="message-content">
+                ${props.textContent}
+            </div>
+        </div>
+    </div>
+    ` //example element in array
+] // array of html elements from message()
+let openAiChatHistory = [
+    {
+        role: 'system', 
+        content: guidance // guidance = "Your job is to provide concise responses and answers to what the user asks. If the user is asking about the summary or content, prioritise answering with information given. Format responses to be as readible as possible, if there are sub topics/topics bold the name of the sub topic/topic";
+    }, 
+    {
+        role: 'user', 
+        content: `Create a concise summary of ${pdfText}. format your response in the most readable way possible.`
+    },
+    {
+        role: 'assistant',
+        content: 'AI response' 
+    }
+]
+```
+
+### Fetching ai response from openai API
+```javascript
+import * as Tiktoken from 'js-tiktoken'; 
+import OpenAI from 'openai';
+
+// copied from https://github.com/openai/openai-node
+const openai = new OpenAI({
+    apiKey: 'My API Key', // defaults to process.env["OPENAI_API_KEY"]
+});
+
+const getMessageTokens = async (chatHistory) => {
+    // Initialize the encoder for the "gpt-3.5-turbo" model.
+    const encoder = Tiktoken.encodingForModel("gpt-3.5-turbo");
+    // Initialize an empty array to store the tokens.
+    let total_tokens = [];
+    // Iterate over each message in the chat history.
+    chatHistory.forEach((message) => {
+        // Encode the content of the message into tokens.
+        const tokens = encoder.encode(message.content);
+        // Concatenate the tokens into the total_tokens array.
+        total_tokens = total_tokens.concat(tokens);
+    });
+
+    // Return the total number of tokens.
+    return total_tokens.length;
+}
+
+const fetchChatCompletion = (message, context, openaiChatHistory) => {
+    // check if the messages are over the token limit
+    let tokens;
+
+    if (context){
+        openaiChatHistory.push({
+            role: 'user',
+            content: `from ${context}. ${message}`
+        })
+    } else {
+        openaiChatHistory.push({
+            role: 'user',
+            content: message
+        })
+    } 
+
+    do {
+        tokens = await getMessageTokens(openaiChatHistory);
+        // remove the second message from the chat history (because the first is the guidance message)
+        if (openaiChatHistory.length > 2 && tokens > 4096){
+            openaiChatHistory.splice(1, 1); 
+        // if theres only the guidance and user message left, the page is too long.
+        } else if (openaiChatHistory.length === 2 && tokens > 4096){
+            setTextContent("Sorry, this page is too long to read.");
+            return;
+        }
+    } while (tokens > 4096);
+
+    try {
+        props.setIsGenerating(true);
+
+        const result = await openai.chat.completions.create({
+            model: 'gpt-3.5-turbo',
+            messages: openaiChatHistory,
+        });
+
+        props.setIsGenerating(false);
+
+        // add bot response to openaiChatHistory
+        setOpenaiChatHistory(openaiChatHistory.concat({ role: 'assistant', content: result }));
+
+        return result;
+
+    } catch (error) {
+        if (error.type && error.type === "invalid_request_error"){
+            return "invalid request";
+        } else if (error.type && error.type === "rate_limit_exceeded"){
+            return "Rate limit exceeded. Please try again later.";
+        } else {
+            throw error;
+        }
+    }
 }
 
 ```
