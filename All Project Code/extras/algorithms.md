@@ -1,10 +1,27 @@
 # Psuedocode algoritms for each partials/components
 
+# Nothing in this file is finalised
+
+## Table of Contents
+
+1. [message.js](#message)
+    - [get-message route](#example-get-messages-route)
+    - [send-message route](#example-send-message-route)
+    - [storing message history](#required-arrays-to-store-message-history)
+2. [GPT.js](#gpt)
+    - [calculating tokens](#getting-message-tokens)
+    - [calling the api](#calling-the-api)
+3. [chat.ejs](#chatejs)
+    - [get-latest-message-id]()
+
+
+
+
 ## [message](../src/components/message/message.js)
 
 this file will be used to construct the HTML for a message, and in chat.ejs, we will loop through an array of these messages and render them to the page
 
-props will be an object with the following properties:
+props will be an object with the following properties: (it doesn't have to be props, we can do individual parameters, this is just a remnant of my react project)
 - isBot: boolean, true if the message is from the bot, false if it is from the user
 - author: string, the author of the message
 - textContent: string, the text content of the message
@@ -17,7 +34,35 @@ we need an endpoint /get-messages that will return an array of messages. We will
 
 we also need to find a way to have it keep checking for updates to the messages array. One idea i have is maybe for /get-messages, if the ai is still generating (maybe we have a isGenerating flag), then it will return a 204 status code, and if it is done generating, it will return a 200 status code with the array of messages. Then, we can use javascript to keep calling /get-messages until we get a 200 status code, and then we can render the messages to the page.
 
-### Example responses for the /get-messages route
+```javascript
+// message.js
+
+export default function message(props) {
+    const containerClass = props.isBot ? "bot-message-container" : "user-message-container";
+    const messageClass = props.isBot ? "bot-message" : "user-message";
+    const authorText = props.isBot ? "AI ✨" : "${props.author}}";
+
+    // Construct the HTML string
+    const html = `
+        <div class="${containerClass}">
+            <div class="${messageClass}" id="msg${props.messageId}">
+                <div class="author">
+                    ${authorText}
+                </div>
+                <div class="message-content">
+                    ${props.textContent}
+                </div>
+            </div>
+        </div>
+    `;
+
+    return html;
+}
+
+```
+
+
+### Example /get-messages route
 ```javascript
 const messages = [
     {
@@ -67,7 +112,7 @@ app.get('/get-messages', (req, res) => {
 });
 ```
 
-we also need a /send-message endpoint
+### Example /send-message route
 ```javascript
 // /send-message route handler
 app.post('/send-message', (req, res) => {
@@ -78,8 +123,11 @@ app.post('/send-message', (req, res) => {
         isBot: false,
         author,
         textContent,
-        messageId: (messages.length + 1).toString()
+        messageId: (messages.length + 1).toString(),
+        messageHTML: message({isBot: false, author, textContent, messageId: (messages.length + 1).toString()}) 
+        //idk if the messageHTML line is gonna work lol
     };
+
 
     // Add the new message to the messages array
     messages.push(newMessage);
@@ -87,59 +135,43 @@ app.post('/send-message', (req, res) => {
     res.status(201).json(newMessage); // Return 201 status code with the new message object
     // response
     // {
-    //     status: 201,
-    //     message: {
+    //      status: 201,
+    //      message: {
     //         ...
     //     }
     // }
 
     // get ai generated response 
-    fetchChatCompletion(textContent, pdfPageText, openAiChatHistory)
+    isGenerating = true;
+    await fetchChatCompletion(textContent, pdfPageText, openAiChatHistory);
+    isGenerating = false;
 });
 ```
 
-```javascript
-// message.js
-
-export default function message(props) {
-    const containerClass = props.isBot ? "bot-message-container" : "user-message-container";
-    const messageClass = props.isBot ? "bot-message" : "user-message";
-    const authorText = props.isBot ? "AI ✨" : "${props.author}}";
-
-    // Construct the HTML string
-    const html = `
-        <div class="${containerClass}">
-            <div class="${messageClass}" id="${props.messageId}">
-                <div class="author">
-                    ${authorText}
-                </div>
-                <div class="message-content">
-                    ${props.textContent}
-                </div>
-            </div>
-        </div>
-    `;
-
-    return html;
-}
-
-```
 
 ### Required arrays to store message history
 ```javascript
 let messages = [
-    `
-    <div class="${containerClass}">
-        <div class="${messageClass}" id="${props.messageId}">
-            <div class="author">
-                ${authorText}
+    {
+        isBot: false,
+        author: "username",
+        textContent: "user text",
+        messageId: 1,
+        messageHTML: 
+        `
+            <div class="user-message-container">
+                <div class="user-message" id="msg1">
+                    <div class="author">
+                        username
+                    </div>
+                    <div class="message-content">
+                        user text
+                    </div>
+                </div>
             </div>
-            <div class="message-content">
-                ${props.textContent}
-            </div>
-        </div>
-    </div>
-    ` //example element in array
+        `
+    },
+    ...
 ] // array of html elements from message()
 let openAiChatHistory = [
     {
@@ -153,16 +185,22 @@ let openAiChatHistory = [
     {
         role: 'assistant',
         content: 'AI response' 
-    }
+    },
+    ... //should alternate user and assistant
 ]
 ```
+
+## [GPT](../src/utilities/GPT.js)
 
 ### Fetching ai response from openai API
 ```javascript
 import * as Tiktoken from 'js-tiktoken'; 
 import OpenAI from 'openai';
+```
 
-// copied from https://github.com/openai/openai-node
+### Getting message tokens
+copied from https://github.com/openai/openai-node
+```javascript
 const openai = new OpenAI({
     apiKey: 'My API Key', // defaults to process.env["OPENAI_API_KEY"]
 });
@@ -183,8 +221,12 @@ const getMessageTokens = async (chatHistory) => {
     // Return the total number of tokens.
     return total_tokens.length;
 }
+```
 
-const fetchChatCompletion = (message, context, openaiChatHistory) => {
+### Calling the API
+
+```javascript
+const fetchChatCompletion = async (message, messages, context, openaiChatHistory) => {
     // check if the messages are over the token limit
     let tokens;
 
@@ -213,29 +255,92 @@ const fetchChatCompletion = (message, context, openaiChatHistory) => {
     } while (tokens > 4096);
 
     try {
-        props.setIsGenerating(true);
 
         const result = await openai.chat.completions.create({
             model: 'gpt-3.5-turbo',
             messages: openaiChatHistory,
         });
 
-        props.setIsGenerating(false);
-
         // add bot response to openaiChatHistory
         setOpenaiChatHistory(openaiChatHistory.concat({ role: 'assistant', content: result }));
 
-        return result;
+        // create the new bot message
+        messages.push(message({
+            isbot: true,
+            author: 'AI ✨',
+            textContent: result,
+            messageId: (messages.length + 1).toString()
+        }));
+
+
+        return;
 
     } catch (error) {
         if (error.type && error.type === "invalid_request_error"){
-            return "invalid request";
+            // create the new bot message
+            messages.push(message({
+                isbot: true,
+                author: 'AI ✨',
+                textContent: "Invalid request",
+                messageId: (messages.length + 1).toString()
+            }));
+            return;
         } else if (error.type && error.type === "rate_limit_exceeded"){
-            return "Rate limit exceeded. Please try again later.";
+            messages.push(message({
+                isbot: true,
+                author: 'AI ✨',
+                textContent: "Rate limit exceeded. Please try again later.",
+                messageId: (messages.length + 1).toString()
+            }));
+            return;
         } else {
             throw error;
         }
     }
 }
+
+```
+
+## [Chat.ejs](../src/views/partials/chat.ejs)
+
+### probably required route /get-latest-message-id
+
+response:
+- status
+- latestMessageId
+```javascript
+app.get('/get-latest-message-id', (req,res) => {
+        const latestMessageId = messages[messages.length - 1].messageId;
+        res.status(200).json({ latestMessageId });
+});
+```
+
+### ejs file
+```javascript
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    // Function to update the messages display
+    function updateMessagesDisplay() {
+        fetch('/get-messages')
+            .then(response => response.json())
+            .then(data => {
+                // Assuming `data` is an array of message objects
+                const messagesContainer = document.getElementById('messages');
+                // add each message to that element
+            });
+    }
+
+    // Call this function on initial load
+    updateMessagesDisplay();
+
+    // Optionally, set this to update periodically
+    // setInterval(updateMessagesDisplay, 5000); // Update every 5 seconds
+});
+</script>
+
+</script>
+<!-- chat elements -->
+<div classname = "messages">
+</div>
 
 ```
