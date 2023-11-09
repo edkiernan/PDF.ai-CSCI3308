@@ -12,8 +12,9 @@
     - [calculating tokens](#getting-message-tokens)
     - [calling the api](#calling-the-api)
 3. [chat.ejs](#chatejs)
-    - [get-latest-message-id]()
-
+    - [get-latest-message-id](#probably-required-route-get-latest-message-id)
+    - [script](#ejs-file)
+4. [PDFViewer.ejs](#pdfviewerejs)
 
 
 
@@ -62,54 +63,36 @@ export default function message(props) {
 ```
 
 
-### Example /get-messages route
+### Example /get-messages route (may not be necessary)
+
+> if we are storing this it has to be in a database.
+
 ```javascript
-const messages = [
-    {
-        isBot: true,
-        author: "AI ✨",
-        textContent: "Hello, how can I assist you today?",
-        messageId: "1"
-    },
-    {
-        isBot: false,
-        author: "User",
-        textContent: "I have a question about your product.",
-        messageId: "2"
-    },
-    {
-        isBot: true,
-        author: "AI ✨",
-        textContent: "Sure, I'm here to help. What's your question?",
-        messageId: "3"
-    }
-];
+// /get-summary route handler
+app.post('/fetch-summary', (req, res) => {
+    // Return the messages array
+    const { context, pageText } = req.body;
+    // because summaries don't have to be context aware, we can just use the pageText as the context
+    let openaiChatHistory = [
+        {
+            role: 'system', 
+            content: guidance
+        }, 
+        {
+            role: 'user', 
+            content: `Summarise ${props.text}`
+        }
+    ]
 
-// /get-messages route handler
-app.get('/get-messages', (req, res) => {
-    // Check if AI is still generating
-    const isGenerating = true; // Replace with logic to check if AI is still generating
-
-    if (isGenerating) {
-        res.sendStatus(204); // Return 204 status code if AI is still generating
-        // response
-        // {
-        //     status: 204
-        // }
-    } else {
-        res.status(200).json(messages); // Return 200 status code with messages array if AI is done generating
-        // response
-        // {
-        //     status: 200,
-        //     messages: [
-        //         {
-        //             ...
-        //         },
-        //         ...
-        //     ]
-        // }
-    }   
+    let summary = fetchChatCompletion(context, pageText, openaiChatHistory);
+    res.status(200).json({ summary });
+    // response
+    // {
+    //      status: 200,
+    //      summary: "summary"
+    // }
 });
+
 ```
 
 ### Example /send-message route
@@ -152,6 +135,7 @@ app.post('/send-message', (req, res) => {
 ### Required arrays to store message history
 
 > on further thought, we probably need a database instead because we can't have an array for each user. So even if it is not specific to the PDF, it can just be the user's chat history.
+>> Alternatively, we could just have the client side store everything
 
 ```javascript
 let messages = [
@@ -321,29 +305,39 @@ app.get('/get-latest-message-id', (req,res) => {
 ### ejs file
 ```javascript
 <script>
+    // this runs the function on first load
     document.addEventListener('DOMContentLoaded', function() {
-    // Function to update the messages display
-    function updateMessagesDisplay() {
-        fetch('/get-messages')
-            .then(response => response.json())
-            .then(data => {
-                // Assuming `data` is an array of message objects
-                const messagesContainer = document.getElementById('messages');
-                // add each message to that element
-            });
-    }
+        // Function to update the messages display
+        function updateMessagesDisplay() {
+            fetch('/get-messages')
+                .then(response => response.json())
+                .then(data => {
+                    // Assuming `data` is an array of message objects
+                    const messagesContainer = document.getElementById('messages');
+                    // add each message to that element
+                });
+        }
 
-    // Call this function on initial load
-    updateMessagesDisplay();
+        // Call this function on initial load
+        updateMessagesDisplay();
 
-    // Optionally, set this to update periodically
-    // setInterval(updateMessagesDisplay, 5000); // Update every 5 seconds
-});
+        // Optionally, set this to update periodically
+        // setInterval(updateMessagesDisplay, 5000); // Update every 5 seconds
+    });
 </script>
+```
 
-</script>
-<!-- chat elements -->
+> since we don't expect any messages out of the blue, it isn't necessary to use setInterval. We can have this function triggered when the user clicks on the generate or send button instead.
+
+```javascript
+<!-- generate button -->
 <div classname = "messages">
 </div>
+<!-- chat elements -->
 
 ```
+
+# PDFViewer.ejs
+
+### required global variables
+- pageText, `window.pdf.pageText`: because the chat.ejs partials would probably require it.
