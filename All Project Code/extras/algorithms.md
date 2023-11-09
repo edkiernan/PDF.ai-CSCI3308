@@ -88,7 +88,7 @@ const messages = [
 // /get-messages route handler
 app.get('/get-messages', (req, res) => {
     // Check if AI is still generating
-    const isGenerating = true; // Replace with your logic to check if AI is still generating
+    const isGenerating = true; // Replace with logic to check if AI is still generating
 
     if (isGenerating) {
         res.sendStatus(204); // Return 204 status code if AI is still generating
@@ -150,6 +150,9 @@ app.post('/send-message', (req, res) => {
 
 
 ### Required arrays to store message history
+
+> on further thought, we probably need a database instead because we can't have an array for each user. So even if it is not specific to the PDF, it can just be the user's chat history.
+
 ```javascript
 let messages = [
     {
