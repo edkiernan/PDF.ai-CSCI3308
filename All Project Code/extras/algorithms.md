@@ -5,14 +5,13 @@
 ## Table of Contents
 
 1. [message.js](#message)
-    - [get-message route](#example-get-messages-route)
+    - [get-message route](#example-fetch-summary-route)
     - [send-message route](#example-send-message-route)
     - [storing message history](#required-arrays-to-store-message-history)
 2. [GPT.js](#gpt)
     - [calculating tokens](#getting-message-tokens)
     - [calling the api](#calling-the-api)
 3. [chat.ejs](#chatejs)
-    - [get-latest-message-id](#probably-required-route-get-latest-message-id)
     - [script](#ejs-file)
 4. [PDFViewer.ejs](#pdfviewerejs)
 
@@ -63,7 +62,7 @@ export default function message(props) {
 ```
 
 
-### Example /get-messages route (may not be necessary)
+### Example /fetch-summary route
 
 > if we are storing this it has to be in a database.
 
@@ -289,18 +288,6 @@ const fetchChatCompletion = async (message, messages, context, openaiChatHistory
 ```
 
 ## [Chat.ejs](../src/views/partials/chat.ejs)
-
-### probably required route /get-latest-message-id
-
-response:
-- status
-- latestMessageId
-```javascript
-app.get('/get-latest-message-id', (req,res) => {
-        const latestMessageId = messages[messages.length - 1].messageId;
-        res.status(200).json({ latestMessageId });
-});
-```
 
 ### ejs file
 ```javascript
