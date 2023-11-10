@@ -1,0 +1,33 @@
+<%- include ('../partials/header') %> 
+<%- include ('../partials/menu') %>
+
+<main>
+ <div class="container">
+   <h1><center>Welcome User: <%= username %></center></h1>
+   <style>
+     table {
+       width: 100%;
+       border-collapse: collapse;
+     }
+     th, td {
+       border: 1px solid black;
+       padding: 15px;
+       text-align: left;
+     }
+   </style>
+   <table>
+     <tr>
+       <th>First Name</th>
+       <th>Last Name</th>
+       <th>Email</th>
+     </tr>
+     <tr>
+       <td><%= first_name %></td>
+       <td><%= last_name %></td>
+       <td><%= email %></td>
+     </tr>
+   </table>
+ </div>
+</main>
+
+<%- include ('../partials/footer') %>
