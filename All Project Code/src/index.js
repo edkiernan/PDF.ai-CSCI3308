@@ -141,32 +141,6 @@ app.post("/login", (req, res) => {
 // Authentication Required
 app.use(auth);
 
-app.get('/discover', (req, res) => {
-        // Make the API call using Axios
-        axios({
-          url: 'https://app.ticketmaster.com/discovery/v2/events.json',
-          method: 'GET',
-          dataType: 'json',
-          headers: {
-            'Accept-Encoding': 'application/json',
-          },
-          params: {
-            apikey: process.env.API_KEY,
-            keyword: 'rap', // Example keyword (you can change it)
-            size: 10 // Example number of search results (you can change it)
-          },
-        })
-        .then(results => {
-          const data = results.data._embedded ? results.data._embedded.events : [];
-          res.render('pages/discover', { results: data, message: `Logged in Successfully`,});
-          console.log(data);
-        })
-        .catch(error => {
-          console.error(error);
-          res.render('pages/discover', { results: [], error: 'Failed to fetch data from Ticketmaster API' });
-        });
-      });
-
 app.get("/logout", (req, res) => {
         req.session.destroy();
         res.render('pages/login', {message: `Logged out successfully`});
