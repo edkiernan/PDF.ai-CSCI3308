@@ -13,9 +13,10 @@
     - [calling the api](#calling-the-api)
 3. [chat.ejs](#chatejs)
     - [script](#ejs-file)
-4. [PDFViewer.ejs](#pdfviewerejs)
-
-
+4. [PDFViewer](#pdfviewer-backend-and-ejs)
+    - [uploading](#uploading)
+    - [retrieving](#retrieving)
+    - [ejs file](#ejs-file-1)
 
 ## [message](../src/components/message/message.js)
 
@@ -324,7 +325,128 @@ const fetchChatCompletion = async (message, messages, context, openaiChatHistory
 
 ```
 
-# PDFViewer.ejs
+# PDFViewer (backend and ejs)
 
-### required global variables
+### Required global variables
 - pageText, `window.pdf.pageText`: because the chat.ejs partials would probably require it.
+
+### Storing PDF in Cloud 
+
+#### uploading
+
+```javascript
+const express = require('express');
+const { Storage } = require('@google-cloud/storage');
+
+const app = express();
+
+// Create a new instance of Storage (global variable)
+const storage = new Storage();
+const bucketName = 'your-bucket-name'; // Replace with actual bucket name
+
+app.post('/upload-pdf', upload.single('pdfFile'), async (req, res) => {
+  try {
+    const file = req.file;
+    if (!file) {
+      res.status(400).send('No file uploaded.');
+      return;
+    }
+
+    const pdfFile = file.path;
+    const destination = 'pdf_uploads/' + file.originalname; // Define the destination path in the bucket
+
+    // Upload the PDF file to Google Cloud Storage
+    await storage.bucket(bucketName).upload(pdfFile, {
+      destination: destination,
+      metadata: {
+        contentType: 'application/pdf' // Set the content type of the file
+      },
+    });
+
+    // File has been uploaded to Google Cloud Storage, now delete the local file
+    fs.unlink(pdfFile, (err) => {
+      if (err) {
+        console.error('Error deleting local file:', err);
+        // Depending on your application needs, you may or may not want to send an error response here
+      } else {
+        console.log('Successfully deleted local file');
+      }
+    });
+
+    res.status(200).send('File uploaded and stored successfully!');
+  } catch (error) {
+    console.error('Error uploading file:', error);
+    res.status(500).send('An error occurred while uploading the file.');
+  }
+});
+
+```
+
+### retrieving
+
+```javascript
+app.get('/get-pdf/:fileName', async (req, res) => {
+  const fileName = req.params.fileName; // Get the file name from the request parameters
+
+  try {
+    const file = storage.bucket(bucketName).file(fileName);
+
+    file.download((err, contents) => {
+      if (err) {
+        console.error('Error downloading file:', err);
+        res.status(500).send('An error occurred while retrieving the file.');
+      } else {
+        // Set the appropriate content type for PDF
+        res.contentType('application/pdf');
+        // Send the file contents as the response
+        res.status(200).send(contents);
+      }
+    });
+  } catch (error) {
+    console.error('Error retrieving file:', error);
+    res.status(500).send('An error occurred while retrieving the file.');
+  }
+});
+```
+
+# ejs file
+
+```javascript
+<canvas id="pdf-canvas"></canvas>
+
+<script src="//mozilla.github.io/pdf.js/build/pdf.js"></script>
+<script>
+    // URL to the PDF
+    var url = '/retrieve-pdf/your-pdf-file-name.pdf'; // adjust the file name as necessary
+
+    // Asynchronously load the PDF
+    var loadingTask = pdfjsLib.getDocument(url);
+    loadingTask.promise.then(function(pdf) {
+    // Fetch the first page
+    var pageNumber = 1;
+    pdf.getPage(pageNumber).then(function(page) {
+        var scale = 1.5;
+        var viewport = page.getViewport({ scale: scale });
+
+        // Prepare canvas using PDF page dimensions
+        var canvas = document.getElementById('pdf-canvas');
+        var context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        // Render PDF page into canvas context
+        var renderContext = {
+        canvasContext: context,
+        viewport: viewport
+        };
+        
+    page.render(renderContext).promise.then(function() {
+        console.log('Page rendered');
+        });
+    });
+    }).catch(function(error) {
+    // Handle any errors here if PDF failed to load
+    console.error('Error loading PDF:', error);
+    });
+</script>
+```
