@@ -1,0 +1,32 @@
+<%- include ('../partials/header') %>
+<%- include ('../partials/menu') %>
+
+<main>
+     <!-- form for styled with bootstrap -->
+     <div class="container mx-auto d-flex justify-content-center align-items-center" style="height: 75vh;">
+        <!-- api call -->
+      <form action="/login" method="post" style="text-align: center;">
+        <legend>Login</legend>
+        <!-- Email part of form -->
+        <div class="form-outline mb-4">
+          <input type="email" id="email" class="form-control" />
+          <label class="form-label" for="login">Email</label>
+        </div>
+        <!-- Password part of form -->
+        <div class="form-outline mb-4">
+          <input type="password" id="password" class="form-control"/>
+          <label class="form-label" for="login">Password</label>
+        </div>
+          <!-- Commented out code is another submit button. Ensure of functionality of current button. -->
+          <!-- <input type="submit" style="background-color:CadetBlue" value="Login"> -->
+          <button type="submit" class="btn btn-primary btn-block mb-4">Sign in</button>
+          <div class="col">
+            <!-- sends user to register page -->
+            <a href="register">No account? Click here to Register.</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+
+<%- include ('../partials/footer') %>

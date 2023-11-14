@@ -1,0 +1,37 @@
+<%- include ('../partials/header') %>
+<%- include ('../partials/menu') %>
+
+<main>
+     <!-- form for styled with bootstrap -->
+     <div class="container mx-auto d-flex justify-content-center align-items-center" style="height: 75vh;">
+        <!-- api call -->
+      <form action="/register" method="post" style="text-align: center;">
+        <legend id="form_title">Register</legend>
+        <!-- Email part of form -->
+        <div class="form-outline mb-4">
+          <input type="email" id="email" class="form-control" />
+          <label class="form-label" for="form2Example1">Email</label>
+        </div>
+        <!-- Username part of form -->
+        <div class="form-outline mb-4">
+          <input type="password" id="username" class="form-control" />
+          <label class="form-label" for="username">Create a username</label>
+        </div>
+        <!-- Password part of form -->
+        <div class="form-outline mb-4">
+          <input type="password" id="password" class="form-control" />
+          <label class="form-label" for="password">Create a password</label>
+        </div>
+          <!-- Commented out code is another submit button. Ensure of functionality of current button. -->
+          <!-- <input type="submit" style="background-color:CadetBlue" value="Login"> -->
+          <button type="submit" class="btn btn-primary btn-block mb-4">Register</button>
+          <div class="col">
+            <!-- sends user to register page -->
+            <a href="login">Have an account? Click here to Login.</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+
+<%- include ('../partials/footer') %>
