@@ -14,6 +14,8 @@ const upload = multer({ dest: 'uploads/' });
 require('dotenv').config(); // To read the .env file
 const storage = new Storage();
 const bucketName = process.env.GCLOUD_STORAGE_BUCKET;
+const fs = require('fs');
+
 
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
@@ -32,14 +34,14 @@ const db = pgp(dbConfig);
 
 // db test
 db.connect()
-  .then((obj) => {
-    // Can check the server version here (pg-promise v10.1.0+):
-    console.log("Database connection successful");
-    obj.done(); // success, release the connection;
-  })
-  .catch((error) => {
-    console.log("ERROR:", error.message || error);
-  });
+    .then((obj) => {
+        // Can check the server version here (pg-promise v10.1.0+):
+        console.log("Database connection successful");
+        obj.done(); // success, release the connection;
+    })
+    .catch((error) => {
+        console.log("ERROR:", error.message || error);
+    });
 
 // set the view engine to ejs
 app.set("view engine", "ejs");
@@ -60,11 +62,11 @@ app.use(
     })
 );
 
-const users = {
-    username: undefined,
-    password: undefined,
-    email: undefined,
-};
+// const user = {
+//     username: undefined,
+//     password: undefined,
+//     email: undefined,
+// };
 
 // ****************************************************
 // <!-- Section 2 : Enpoint Implementation-->
@@ -77,127 +79,154 @@ app.get('/welcome', (req, res) => {
 
 // Route to redirect to login
 app.get('/', (req, res) => {
-  res.redirect('/login');
+    res.redirect('/login');
 });
 
 //Get for login
 app.get('/login', (req, res) => {
-  res.render('pages/login');
+    res.render('pages/login');
 });
 
 // Post for login
 app.post('/login', async (req, res) => {
-  try {
-    const { username, password, email } = req.body;
+    try {
+        const { username, password, email } = req.body;
 
-    const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', username);
-    const address = await db.oneOrNone('SELECT * FROM users WHERE email = $3', email);
+        const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', username);
+        const address = await db.oneOrNone('SELECT * FROM users WHERE email = $3', email);
 
-    if (!user) {
-      return res.redirect('/register');
+        if (!user) {
+            return res.redirect('/register');
+        }
+
+        if (!address) {
+            return res.redirect('/register');
+        }
+
+        const match = await bcrypt.compare(password, user.password);
+
+        if (!match) {
+            throw new Error('Incorrect password. Try again');
+        }
+
+        req.session.user = user;
+        req.session.address = address;
+        req.session.save();
+
+        // Send a success message
+        res.render('pages/login', { success: 'Logged in successfully!' });
+
+        // You may also redirect to '/home' if needed
+        // res.redirect('/home');
+    } catch (error) {
+        console.error(error);
+        res.render('pages/login', { error: 'An error occurred. Please try again.' });
     }
-
-    if (!address) {
-      return res.redirect('/register');
-    }
-
-    const match = await bcrypt.compare(password, user.password);
-
-    if (!match) {
-      throw new Error('Incorrect password. Try again');
-    }
-
-    req.session.user = user;
-    req.session.address = address;
-    req.session.save();
-
-    // Send a success message
-    res.render('pages/login', { success: 'Logged in successfully!' });
-
-    // You may also redirect to '/home' if needed
-    // res.redirect('/home');
-  } catch (error) {
-    console.error(error);
-    res.render('pages/login', { error: 'An error occurred. Please try again.' });
-  }
 });
 
 
 //Get for register
 app.get('/register', (req, res) => {
-  res.render('pages/register')
+    res.render('pages/register')
 });
 
 // Post for register
 app.post('/register', async (req, res) => {
-  try {
-    const hash = await bcrypt.hash(req.body.password, 10);
+    try {
+        const hash = await bcrypt.hash(req.body.password, 10);
 
-    const query = `
+        const query = `
         INSERT INTO users (username, password, email)
         VALUES ($1, $2, $3)
         RETURNING *
     `;
-    const result = await db.one(query, [req.body.username, hash, req.body.email]);
+        const result = await db.one(query, [req.body.username, hash, req.body.email]);
 
-    // Send a success message
-    res.render('pages/register', { success: 'Registered successfully! Please log in.' });
+        // Send a success message
+        res.render('pages/register', { success: 'Registered successfully! Please log in.' });
 
-    // You may also redirect to '/login' if needed
-    // res.redirect('/login');
-  } catch (error) {
-    console.error(error);
-    res.redirect('/register');
-  }
+        // You may also redirect to '/login' if needed
+        // res.redirect('/login');
+    } catch (error) {
+        console.error(error);
+        res.redirect('/register');
+    }
 });
 
 
 // Authentication Middleware.
 const auth = (req, res, next) => {
-  if (!req.session.user) {
-    // Default to login page.
-    return res.redirect('/login');
-  }
-  next();
+    if (!req.session.user) {
+        // Default to login page.
+        return res.redirect('/login');
+    }
+    next();
 };
 
 // Authentication Required
-app.use(auth);
+app.use(auth); // Uncomment outside of testing
 
 app.post('/upload-pdf', upload.single('pdfFile'), async (req, res) => {
+    let pdfFile = null;
     try {
         const file = req.file;
         if (!file) {
-          res.status(400).send('No file uploaded.');
-          return;
+            res.status(400).json({ message: 'No file uploaded.' });
+            return;
         }
-    
-        const pdfFile = file.path;
-        const destination = 'pdf_uploads/' + file.originalname; // Define the destination path in the bucket
-    
+        pdfFile = file.path;
+        const destination = `pdf_uploads/${req.session.user.username}/${file.originalname}`; // Define the destination path in the bucket
+        // const destination = `pdf_uploads/test_user/${file.originalname}`; // Testing purposes
         // Upload the PDF file to Google Cloud Storage
         await storage.bucket(bucketName).upload(pdfFile, {
-          destination: destination,
-          metadata: {
-            contentType: 'application/pdf' // Set the content type of the file
-          },
+            destination: destination,
+            metadata: {
+                contentType: 'application/pdf' // Set the content type of the file
+            },
         });
-    
-        // File has been uploaded to Google Cloud Storage, now delete the local file
-        fs.unlink(pdfFile, (err) => {
-          if (err) {
-            console.error('Error deleting local file:', err);
-            // Depending on your application needs, you may or may not want to send an error response here
-          } else {
-            console.log('Successfully deleted local file');
-          }
-        });
-    
-        res.status(200).send('File uploaded and stored successfully!');
-      } catch (error) {
+        res.status(200).json({ message: 'File uploaded and stored successfully!', fileName: file.originalname });
+    }
+    catch (error) {
         console.error('Error uploading file:', error);
-        res.status(500).send('An error occurred while uploading the file.');
-      }
+        res.status(500).json({ message: 'An error occurred while uploading the file.' });
+    } finally {
+        if (pdfFile) {
+            try {
+                await fs.promises.unlink(pdfFile); // Make sure to `require('fs').promises;`
+                console.log('Successfully deleted local file');
+            } catch (error) {
+                // Even if Google Cloud Storage upload was successful, log the error for the local file deletion.
+                console.error('Error deleting local file:', error);
+            }
+        }
+    }
+});
+
+app.get('/get-pdf/:fileName', async (req, res) => {
+    const fileName = req.params.fileName; // Get the file name from the request parameters
+    const filePath = `pdf_uploads/${req.session.user.username}/${fileName}`; // Create a path to the file inside the bucket
+    // const filePath = `pdf_uploads/test_user/${fileName}`; // testing purposes
+    try {
+        const file = storage.bucket(bucketName).file(filePath);
+
+        file.download((err, contents) => {
+            if (err && err.code === 404) {
+                console.error('File not found');
+                res.status(404).send('File not found.');
+            } else if (err) {
+                console.error('Error downloading file:', err);
+                res.status(500).send('An error occurred while retrieving the file.');
+            } else {
+                // Set the appropriate content type for PDF
+                res.contentType('application/pdf');
+                // Send the file contents as the response
+                res.send(contents);
+            }
+        });
+    } catch (error) {
+        console.error('Error retrieving file:', error);
+        res.status(500).send('An error occurred while retrieving the file.');
+    }
 });
 
 app.get("/logout", (req, res) => {
