@@ -1,20 +1,31 @@
-// *********************************
-// <!-- Section 1 : Dependencies-->
-// *********************************
+// *****************************************************
+// <!-- Section 1 : Import Dependencies -->
+// *****************************************************
+const express = require('express'); // To build an application server or API
+const app = express()
+const pgp = require('pg-promise')(); // To connect to the Postgres DB from the node server
+const bodyParser = require('body-parser');
+const session = require('express-session'); // To set the session object. To store or access session data, use the `req.session`, which is (generally) serialized as JSON by the store.
+const bcrypt = require('bcrypt'); //  To hash passwords
+const axios = require('axios'); // To make HTTP requests from our server. We'll learn more about it in Part B.
+const multer = require('multer');
+const { Storage } = require('@google-cloud/storage');
+const upload = multer({ dest: 'uploads/' });
+require('dotenv').config(); // To read the .env file
+const storage = new Storage();
+const bucketName = process.env.GCLOUD_STORAGE_BUCKET;
 
-const express = require("express");
-const app = express();
-const pgp = require("pg-promise")();
-const bodyParser = require("body-parser");
-const session = require("express-session");
+// *****************************************************
+// <!-- Section 2 : Connect to DB -->
+// *****************************************************
 
-// db config
+// database configuration
 const dbConfig = {
-  host: "db",
-  port: 5432,
-  database: process.env.POSTGRES_DB,
-  user: process.env.POSTGRES_USER,
-  password: process.env.POSTGRES_PASSWORD,
+    host: 'db', // the database server
+    port: 5432, // the database port
+    database: process.env.POSTGRES_DB, // the database name
+    user: process.env.POSTGRES_USER, // the user account to connect with
+    password: process.env.POSTGRES_PASSWORD, // the password of the user account
 };
 
 const db = pgp(dbConfig);
@@ -36,17 +47,17 @@ app.use(bodyParser.json());
 
 // set session
 app.use(
-  session({
-    secret: "XASDASDA",
-    saveUninitialized: true,
-    resave: true,
-  })
+    session({
+        secret: process.env.SESSION_SECRET,
+        saveUninitialized: false,
+        resave: false,
+    })
 );
 
 app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
+    bodyParser.urlencoded({
+        extended: true,
+    })
 );
 
 const users = {
@@ -58,6 +69,11 @@ const users = {
 // ****************************************************
 // <!-- Section 2 : Enpoint Implementation-->
 // ****************************************************
+
+// from lab 11
+app.get('/welcome', (req, res) => {
+    res.json({ status: 'success', message: 'Welcome!' });
+});
 
 // Route to redirect to login
 app.get('/', (req, res) => {
@@ -148,10 +164,46 @@ const auth = (req, res, next) => {
 // Authentication Required
 app.use(auth);
 
+app.post('/upload-pdf', upload.single('pdfFile'), async (req, res) => {
+    try {
+        const file = req.file;
+        if (!file) {
+          res.status(400).send('No file uploaded.');
+          return;
+        }
+    
+        const pdfFile = file.path;
+        const destination = 'pdf_uploads/' + file.originalname; // Define the destination path in the bucket
+    
+        // Upload the PDF file to Google Cloud Storage
+        await storage.bucket(bucketName).upload(pdfFile, {
+          destination: destination,
+          metadata: {
+            contentType: 'application/pdf' // Set the content type of the file
+          },
+        });
+    
+        // File has been uploaded to Google Cloud Storage, now delete the local file
+        fs.unlink(pdfFile, (err) => {
+          if (err) {
+            console.error('Error deleting local file:', err);
+            // Depending on your application needs, you may or may not want to send an error response here
+          } else {
+            console.log('Successfully deleted local file');
+          }
+        });
+    
+        res.status(200).send('File uploaded and stored successfully!');
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        res.status(500).send('An error occurred while uploading the file.');
+      }
+});
+
 app.get("/logout", (req, res) => {
-      req.session.destroy();
-      res.render('pages/login', {message: `Logged out successfully!`});
-    });
+    req.session.destroy();
+    res.render('pages/login', { message: `Logged out successfully` });
+});
 
 // *****************************************************
 // <!-- Section 3 : Start Server-->
