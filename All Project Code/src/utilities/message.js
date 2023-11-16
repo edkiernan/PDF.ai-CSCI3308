@@ -36,16 +36,16 @@ const clientOptions = {
   apiEndpoint: 'us-central1-aiplatform.googleapis.com',
 };
 const predictionServiceClient = new PredictionServiceClient(clientOptions);
-const project = 'csci-3308-final-project-405018'; // Replace with your GCP Project ID
-//const location = ''; // Replace with  Vertex AI location
+const project = 'csci-3308-final-project-405018'; 
+const location = ''; 
 const publisher = 'google';
-// const model = ''; // Replace with our Vertex AI model name
+const model = 'text-bison@001'; 
 
 let messages = [];
 let isGenerating = false;
 
 // /get-messages route handler
-app.get('/fetch-messages', (req, res) => {
+app.get('/fetch-message', (req, res) => {
     if (isGenerating) {
         return res.status(204).send();
     } else {
@@ -108,6 +108,34 @@ app.post('/send-message', async (req, res) => {
     } catch (error) {
         console.error('Error generating AI response:', error);
         isGenerating = false;
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// /fetch-summary route handler
+app.post('/fetch-summary', async (req, res) => {
+    try {
+        const { context, pageText } = req.body;
+
+        // Prepare AIChatHistory based on the received context and page text
+        let AIChatHistory = [
+            {
+                role: 'system',
+                content: 'Some guidance or initial message',
+            },
+            {
+                role: 'user',
+                content: `Summarize ${context}`, // You can modify this as needed
+            },
+        ];
+
+        // Generate the summary using the provided function or model
+        let summary = await fetchChatCompletion(context, pageText, AIChatHistory);
+
+        // Return the generated summary
+        res.status(200).json({ summary });
+    } catch (error) {
+        console.error('Error generating summary:', error);
         return res.status(500).json({ error: 'Internal Server Error' });
     }
 });
