@@ -26,9 +26,20 @@ export default function createMessage(props) {
 
 const express = require('express');
 const bodyParser = require('body-parser');
-
+const { PredictionServiceClient } = require('@google-cloud/aiplatform');
+const { helpers } = require('@google-cloud/aiplatform');
 const app = express();
 app.use(bodyParser.json());
+
+// Initialize Vertex AI PredictionServiceClient
+const clientOptions = {
+  apiEndpoint: 'us-central1-aiplatform.googleapis.com',
+};
+const predictionServiceClient = new PredictionServiceClient(clientOptions);
+const project = 'csci-3308-final-project-405018'; // Replace with your GCP Project ID
+//const location = ''; // Replace with  Vertex AI location
+const publisher = 'google';
+// const model = ''; // Replace with our Vertex AI model name
 
 let messages = [];
 let isGenerating = false;
@@ -36,10 +47,8 @@ let isGenerating = false;
 // /get-messages route handler
 app.get('/fetch-messages', (req, res) => {
     if (isGenerating) {
-        // If AI is still generating, return a 204 status code
         return res.status(204).send();
     } else {
-        // If AI is done generating, return a 200 status code with the array of messages
         return res.status(200).json({ messages });
     }
 });
@@ -48,38 +57,61 @@ app.get('/fetch-messages', (req, res) => {
 app.post('/send-message', async (req, res) => {
     const { author, textContent } = req.body;
 
-    // Create a new message object
     const newMessage = {
         isBot: false,
         author,
         textContent,
         messageId: (messages.length + 1).toString(),
     };
-
-    // Add the new message to the messages array
     messages.push(newMessage);
 
-    // Simulate AI generation
     isGenerating = true;
-    // Replace the following line with your actual AI response logic
-    // const aiResponse = await fetchChatCompletion(textContent, pdfPageText, openAiChatHistory);
-    const aiResponse = 'AI response';
-    isGenerating = false;
 
-    // Add AI response to the messages array
-    const aiMessage = {
-        isBot: true,
-        author: 'AI ✨',
-        textContent: aiResponse,
-        messageId: (messages.length + 1).toString(),
-    };
-    messages.push(aiMessage);
+    try {
+        // Call Vertex AI to generate AI response
+        const endpoint = `projects/${project}/locations/${location}/publishers/${publisher}/models/${model}`;
+        const prompt = {
+            prompt: textContent,
+        };
+        const instanceValue = helpers.toValue(prompt);
+        const instances = [instanceValue];
 
-    // Return 201 status code with the new message object
-    return res.status(201).json(newMessage);
+        const parameter = {
+            temperature: 0.2,
+            maxOutputTokens: 256,
+            topP: 0.95,
+            topK: 40,
+        };
+        const parameters = helpers.toValue(parameter);
+
+        const request = {
+            endpoint,
+            instances,
+            parameters,
+        };
+
+        const response = await predictionServiceClient.predict(request);
+
+        const aiResponse = response.predictions[0].generated_text; // Assuming 'generated_text' is the field name in the response
+
+        const aiMessage = {
+            isBot: true,
+            author: 'AI ✨',
+            textContent: aiResponse,
+            messageId: (messages.length + 1).toString(),
+        };
+        messages.push(aiMessage);
+
+        isGenerating = false;
+
+        return res.status(201).json(newMessage);
+    } catch (error) {
+        console.error('Error generating AI response:', error);
+        isGenerating = false;
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
 });
 
-// Listen on a port
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
