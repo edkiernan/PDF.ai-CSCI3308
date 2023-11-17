@@ -105,16 +105,18 @@ app.post('/login', async (req, res) => {
 
         const match = await bcrypt.compare(password, user.password);
 
-        if (!match) {
+        if (match) {
+            // Send a success message
+            res.render('pages/login', { success: 'Logged in successfully!' });
+            req.session.user = user;
+            req.session.save();
+            res.redirect("pages/app");
+        }
+        else{
             throw new Error('Incorrect password. Try again');
         }
 
-        req.session.user = user;
-        req.session.address = address;
-        req.session.save();
 
-        // Send a success message
-        res.render('pages/login', { success: 'Logged in successfully!' });
 
         // You may also redirect to '/home' if needed
         // res.redirect('/home');
