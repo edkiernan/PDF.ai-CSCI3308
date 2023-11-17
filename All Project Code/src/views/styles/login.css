@@ -1,0 +1,12 @@
+body {
+    background-color: lightgreen;
+}
+
+.login_button {
+    transtion-duration: 0.4s;
+}
+
+.login_button:hover {
+    background-color: #04AA6D;
+    color: white;
+}
