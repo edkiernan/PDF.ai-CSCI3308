@@ -16,7 +16,7 @@ const storage = new Storage();
 const bucketName = process.env.GCLOUD_STORAGE_BUCKET;
 const fs = require('fs');
 
-
+const { createMessage, fetchChatCompletion } = require('./utilities/message.js');
 // *****************************************************
 // <!-- Section 2 : Connect to DB -->
 // *****************************************************
@@ -71,6 +71,7 @@ app.use(
 // ****************************************************
 // <!-- Section 2 : Enpoint Implementation-->
 // ****************************************************
+
 
 // from lab 11
 app.get('/welcome', (req, res) => {
@@ -227,6 +228,59 @@ app.get('/get-pdf/:fileName', async (req, res) => {
         console.error('Error retrieving file:', error);
         res.status(500).send('An error occurred while retrieving the file.');
     }
+});
+
+
+app.post('/get-chat-completion', async (req, res) => {
+    try {
+        // sample chat json body
+        // {
+        //     "AIChatHistory" : [
+        //         {
+        //             role: 'user',
+        //             content: "From previous context: answer prompt", 
+        //         },
+        //         {
+        //             role: 'bot',
+        //             content: "bot response", 
+        //         },
+        //         {
+        //             role: 'user',
+        //             content: "From {another context}: answer {prompt}",
+        //         }
+        //     ],
+        //     "isSummary": false
+        // }
+        // sample summary json body
+        // {
+        //     "AIChatHistory" : [
+        //         {
+        //             role: 'user',
+        //             content: "Summarise {content}"
+        //         }
+        //     ],
+        //     "isSummary": true
+        // }
+
+        const {AIChatHistory, isSummary } = req.body;
+
+        // Debug
+        // let AIChatHistory = [
+        //     {
+        //         role: 'user',
+        //         content: `From ${context}: ${prompt}`, // You can modify this as needed
+        //     },
+        // ];
+        // Generate the summary using the provided function or model
+        let response = await fetchChatCompletion(AIChatHistory, isSummary);
+
+        // Return the generated summary
+        res.status(200).json({ response });
+    } catch (error) {
+        console.error('Error generating summary:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+
 });
 
 app.get("/logout", (req, res) => {
