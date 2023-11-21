@@ -45,6 +45,7 @@ db.connect()
 
 // set the view engine to ejs
 app.set("view engine", "ejs");
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // set session
@@ -61,6 +62,8 @@ app.use(
         extended: true,
     })
 );
+
+app.use(express.static(__dirname + '/public'));
 
 // const user = {
 //     username: undefined,
@@ -91,27 +94,30 @@ app.get('/login', (req, res) => {
 // Post for login
 app.post('/login', async (req, res) => {
     try {
-        const { username, password, email } = req.body;
+        console.log(req.body)
 
-        const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', username);
-        const address = await db.oneOrNone('SELECT * FROM users WHERE email = $3', email);
+        const { password, email } = req.body;
+
+
+        // const user = await db.oneOrNone('SELECT * FROM users WHERE username = $1', [username]);
+        const user = await db.oneOrNone('SELECT * FROM users WHERE email = $1', [email]);
+
+        // if (!user) {
+        //     return res.redirect('/register');
+        // }
 
         if (!user) {
-            return res.redirect('/register');
-        }
-
-        if (!address) {
-            return res.redirect('/register');
+            throw new Error("Email not found.");
         }
 
         const match = await bcrypt.compare(password, user.password);
 
         if (match) {
             // Send a success message
-            res.render('pages/login', { success: 'Logged in successfully!' });
+            // res.render('pages/login', { message: 'Logged in successfully!', error: false });
             req.session.user = user;
             req.session.save();
-            res.redirect("pages/app");
+            res.redirect("/app");
         }
         else{
             throw new Error('Incorrect password. Try again');
@@ -123,7 +129,7 @@ app.post('/login', async (req, res) => {
         // res.redirect('/home');
     } catch (error) {
         console.error(error);
-        res.render('pages/login', { error: 'An error occurred. Please try again.' });
+        res.render('pages/login', { message: error.message, error: true });
     }
 });
 
@@ -136,7 +142,11 @@ app.get('/register', (req, res) => {
 // Post for register
 app.post('/register', async (req, res) => {
     try {
-        const hash = await bcrypt.hash(req.body.password, 10);
+        if (!req.body.password || !req.body.username || !req.body.email) {
+            throw new Error('Please fill in all fields.');
+        }
+
+        const hash = await bcrypt.hashSync(req.body.password, 10);
 
         const query = `
         INSERT INTO users (username, password, email)
@@ -144,18 +154,18 @@ app.post('/register', async (req, res) => {
         RETURNING *
     `;
         const result = await db.one(query, [req.body.username, hash, req.body.email]);
+        console.log(result);
 
         // Send a success message
-        res.render('pages/register', { success: 'Registered successfully! Please log in.' });
+        res.render('pages/register', { message: 'Registered successfully! Please log in.', error: false });
 
         // You may also redirect to '/login' if needed
         // res.redirect('/login');
     } catch (error) {
         console.error(error);
-        res.redirect('/register');
+        res.render('pages/register', { message: error.message, error: true });
     }
 });
-
 
 // Authentication Middleware.
 const auth = (req, res, next) => {
@@ -166,8 +176,18 @@ const auth = (req, res, next) => {
     next();
 };
 
+// debugging
+
+// app.get('/debug-app', (req, res) => {
+//     res.render('pages/app', { user: { username: 'test_user' } });
+// });
+
 // Authentication Required
 app.use(auth); // Uncomment outside of testing
+
+app.get('/app', auth, (req, res) => {
+    res.render('pages/app', { user: req.session.user });
+});
 
 app.post('/upload-pdf', upload.single('pdfFile'), async (req, res) => {
     let pdfFile = null;
