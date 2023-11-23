@@ -17,6 +17,8 @@
     "multer": "^1.4.5-lts.1",
     "node-fetch": "^3.3.2",
     "nodemon": "2.0.20",
+    "pdf-parse": "^1.1.1",
+    "pdfjs-dist": "^4.0.189",
     "pg-promise": "^10.11.1"
   },
   "scripts": {

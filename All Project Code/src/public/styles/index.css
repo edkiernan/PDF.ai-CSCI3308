@@ -1,0 +1,76 @@
+:root {
+    --light-nav-color: #e0e3e4;
+    --dark-nav-color: #3b3e3f;
+    --light-nav-hover-color: #C8DED8;
+    --dark-nav-hover-color: #65706D;
+    --light-container-highlight-color : #D8F0E9;
+    --dark-container-highlight-color : #65706D;
+    --light-button-highlight-color : #C1D6D0;
+    --dark-button-highlight-color : #9EB0AB;
+    --nav-color: var(--light-nav-color);
+    --nav-hover-color: var(--light-nav-hover-color);
+    --container-highlight-color: var(--light-container-highlight-color);
+    --button-highlight-color: var(--light-button-highlight-color);
+    --dark-background-color: #313435;
+    --light-background-color: #eef1f2;
+}
+  
+.container {
+    display: flex;
+    height: 95vh; 
+    margin: 10px 0px;
+}
+
+#pdf-container {
+    flex: 1;
+    margin: 10px 10px 5% 0px;
+    background-color: var(--nav-color);
+    padding: 1.5%;
+    border-radius: calc(10px + 1.1vw);
+    width: fit-content;
+}
+
+button {
+    margin: 0 1.3% 2% 0;
+    border: 0;
+    border-radius: calc(8px + 0.3vw);
+    padding: 1.2% 1.5%;
+    background-color: var(--container-highlight-color);
+    font-size: calc(9px + 0.8vw);
+    color: inherit;
+    transition: all 0.2s ease-out;
+}
+
+button:disabled {
+    opacity: 0.4;
+}
+
+#text-container {
+    flex: 1;
+    margin: 10px 0px 5% 10px;
+    background-color: var(--nav-color);
+    padding: 1.5%;
+    border-radius: calc(10px + 1.1vw);
+    width: auto;
+}
+
+.pdf-container input {
+    margin: 0 1.3% 2% 0;
+    border: 0;
+    border-radius: calc(8px + 0.3vw);
+    padding: 1.2% 1.5%;
+    background-color: var(--container-highlight-color);
+    font-size: calc(10px + 0.8vw);
+    color: inherit;
+    transition: all 0.2s ease-out;
+    width: 10%;
+}
+
+#hoverable:hover {
+    cursor: pointer;
+    background-color: var(--button-highlight-color);
+}
+
+#hoverable {
+    user-select: none;
+}
