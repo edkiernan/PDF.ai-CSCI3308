@@ -4,18 +4,19 @@
 
 ## Table of Contents
 
-1. [message.js](#message)
+1. [message.js (DONE)](#message)
     - [get-message route](#example-fetch-summary-route)
     - [send-message route](#example-send-message-route)
     - [storing message history](#required-arrays-to-store-message-history)
-2. [GPT.js](#gpt)
+2. [GPT.js (DONE)](#gpt)
     - [calculating tokens](#getting-message-tokens)
     - [calling the api](#calling-the-api)
 3. [chat.ejs](#chatejs)
     - [script](#ejs-file)
 4. [PDFViewer](#pdfviewer-backend-and-ejs)
-    - [uploading](#uploading)
-    - [retrieving](#retrieving)
+    - [storing to cloud (DONE)](#storing-pdf-in-cloud-done)
+        - [uploading](#uploading)
+        - [retrieving](#retrieving)
     - [ejs file](#ejs-file-1)
 
 ## [message](../src/components/message/message.js)
@@ -330,7 +331,7 @@ const fetchChatCompletion = async (message, messages, context, openaiChatHistory
 ### Required global variables
 - pageText, `window.pdf.pageText`: because the chat.ejs partials would probably require it.
 
-### Storing PDF in Cloud 
+### Storing PDF in Cloud (DONE)
 
 #### uploading
 
@@ -410,6 +411,10 @@ app.get('/get-pdf/:fileName', async (req, res) => {
 ```
 
 # ejs file
+
+### example script for getting the page and rendering it. Please add implementations for additional buttons in the PDFViewer. For changing pages, we likely need it to call the backend to update the page number so the chat can be context aware.
+
+### Make a route that updates the page number. use something like req.session.pageNumber = req.body.pageNumber. 
 
 ```javascript
 <canvas id="pdf-canvas"></canvas>
