@@ -14,7 +14,7 @@ const upload = multer({ dest: 'uploads/' });
 
 const { createMessage, fetchChatCompletion } = require('./utilities/message.js');
 const { uploadPDF, downloadPDF } = require('./utilities/storageHandler.js');
-const { getTextFromPage } = require('./utilities/pdfUtil.js');
+const { getTextFromPage, getMaxNumPages } = require('./utilities/pdfUtil.js');
 
 // database configuration
 const dbConfig = {
@@ -375,6 +375,23 @@ app.post('/get-chat-completion', async (req, res) => {
         return res.status(500).json({ response: 'Internal Server Error' });
     }
 
+});
+
+// API route to get the maximum number of pages from a PDF
+app.get('/getMaxPages', async (req, res) => {
+    try {
+        // Here, you would receive the PDF buffer and page number from the request query or body
+        const { pdfBuffer, pageNumber } = req.query; // Assuming parameters are sent via query
+
+        // Call the getMaxNumPages function passing the received PDF buffer and page number
+        const maxPages = await getMaxNumPages(pdfBuffer, pageNumber);
+
+        // Send the response with the maximum number of pages
+        res.status(200).json({ maxPages });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'An error occurred while processing the request' });
+    }
 });
 
 app.get("/logout", (req, res) => {
