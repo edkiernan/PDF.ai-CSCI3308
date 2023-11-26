@@ -35,6 +35,27 @@ async function getTextFromPage(pdfBuffer, pageNumber) {
     }
 }
 
+async function getMaxNumPages(pdfBuffer, pageNumber) {
+    const pdfjsLib = await import('pdfjs-dist');
+    try {
+        pageNumber = parseInt(pageNumber);
+        // Download the file into a buffer.
+
+        // Convert the buffer into a Uint8Array.
+        const uint8Array = new Uint8Array(pdfBuffer);
+
+        const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
+        const pdfDocument = await loadingTask.promise;
+    
+       // returns the total/maximum number of pages of the uploaded PDF 
+       return pdfDocument.numPages;
+
+    } catch (error) {
+        console.error('Error during PDF upload', error);
+    }
+}
+
 module.exports = {
-    getTextFromPage
+    getTextFromPage,
+    getMaxNumPages
 }
