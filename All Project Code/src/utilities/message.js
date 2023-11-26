@@ -44,7 +44,7 @@ const fetchChatCompletion = async (AIChatHistory, isSummary) => {
         "Content-Type": "application/json",
     };
 
-    console.log(AIChatHistory)
+    // console.log(AIChatHistory)
     let data;
     if (!isSummary) {
         // console.log("chat")

@@ -80,12 +80,12 @@ button:disabled {
     width: 10%;
 }
 
-#hoverable:hover {
+.hoverable:hover {
     cursor: pointer;
-    background-color: var(--button-highlight-color);
+    background-color: var(--button-highlight-color) !important;
 }
 
-#hoverable {
+.hoverable {
     user-select: none;
 }
 

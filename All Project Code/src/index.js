@@ -246,31 +246,7 @@ app.use(auth); // Uncomment outside of testing
 // });
 
 app.get('/app', auth, (req, res) => { // debugging
-    let chatHistory = [
-        `<div class="user-message-container">
-            <div class="user-message" id="message">
-                <div class="author">
-                    ${req.session.user.username}
-                </div>
-                <div class="message-content">
-                    user message 1
-                </div>
-            </div>
-        </div>`,
-        `<div class="bot-message-container">
-            <div class="bot-message" id="message">
-                <div class="author">
-                    AI ✨
-                </div>
-                <div class="message-content">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas at porttitor nibh. Nulla sit amet mattis elit, ac suscipit erat. Nulla odio nibh, rhoncus eget mattis at, porta eget ligula. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec metus tortor, malesuada in est eu, vehicula semper nisl. Aenean ut lobortis est. Integer urna ligula, varius in magna eget, aliquam laoreet risus. Maecenas elementum mi eget nulla scelerisque, sit amet porta diam viverra. Curabitur blandit elit quis lorem fermentum, a sodales ipsum vestibulum. Praesent non auctor nunc. Fusce pharetra in orci sit amet interdum.
-
-                    Cras dapibus dui id ex sollicitudin consequat. Etiam tristique nisl gravida, semper urna at, imperdiet ligula. Suspendisse potenti. Nulla imperdiet ligula at quam elementum elementum. Vestibulum sit amet consequat tortor. Suspendisse ex augue, rutrum eu dui quis, elementum bibendum nibh. Praesent lacinia porttitor urna eget feugiat. Fusce pretium commodo mi, quis pulvinar ante finibus at. Morbi rutrum, nisi bibendum cursus mattis, sapien sapien luctus eros, in feugiat est justo quis tortor. Nam congue enim at pellentesque facilisis. Cras sed mollis dolor, in pellentesque diam. Duis nisi nulla, cursus sit amet orci blandit, suscipit commodo odio. Mauris mollis pulvinar viverra.
-                </div>
-            </div>
-        </div>`
-    ]
-    res.render('pages/app', { username: req.session.user.username, pageNumber: 1, chatHistory, AIChatHistory: [] });
+    res.render('pages/app', { username: req.session.user.username, pageNumber: 1 });
 });
 
 app.post('/upload-pdf', upload.single('pdfFile'), async (req, res) => {
