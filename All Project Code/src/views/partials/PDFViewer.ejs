@@ -1,19 +1,69 @@
+<div id="pdf-container">
+    <button class="page-indicator" disabled>Page NA of NA</button>
+    <button class="nav-button" id="previous-page">
+        <!-- Previous Page -->
+    </button>
+    <button class="nav-button" id="next-page">
+        <!-- Next Page -->
+    </button>
+    <h3>test content</h3>
+    <input type="text" />
+    <button class="nav-button" id="go-button">
+        <!-- Go -->
+    </button>
+</div>
 
+<script src = "/All Project Code/src/utilities/pdfUtil.js">
+    // Adding functionality to all the buttons on click
+    
+    let pageNumber = 1; //initial page number
+    let maxNumPages = await getMaxNumPages(pdfBuffer, pageNumber); //initialize max pages
 
-<button class="page-indicator">Page NA of NA</button>
-<button id="hoverable">
-    Previous Page
-</button>
-<button id="hoverable" >
-    Next Page
-</button>
-<input
-    type="text"
-/>
-<button id="hoverable">
-    Go
-</button>
-<h3>test content</h3>
+    //updating page content based on page number
+    function updatePageContent() {
+        //request to fetch AI summary
+        fetch(`/get-page-summary?pageNumber=${pageNumber}`)
+        .then(response => response.json())
+        .then(data => {
+            //actually updating the content 
+            document.getElementById('page-indicator').innerText = `Page ${pageNumber} of NA`;
+            document.getElementById('content').innerText = data.summary;
+        })
+        .catch(error => console.error('Error fetching content: ', error));
+    }
 
+    //Previous Page functionality
+    document.getElementById('previous-page').addEventListener('click', async function () {
+        //decreasing the page number if not already at minimum
+        if (pageNumber > 1) {
+            pageNumber -= 1;
+            updatePageContent();
+        }
+    });
 
+    //Next Page functionality
+    document.getElementById('next-page').addEventListener('click', async function () {
+        //increasing page number
+        //max page number function made in pdfUtil.js
+        if (pageNumber < maxNumPages) {
+            pageNumber += 1;
+            updatePageContent();
+        }
+    });
 
+    //Go button functionality
+    document.getElementById('go-button').addEventListener('click', async function () {
+        //request to fetch AI summary
+        fetch(`/get-page-summary?pageNumber=${pageNumber}`)
+        .then(response => response.json())
+        .then(data => {
+            //updating content with AI summary
+            document.getElementById('content').innerText = data.summary;
+        })
+        .catch(error => console.error('Error fetching AI summary:', error));
+    });
+
+    //intial content update
+    updatePageContent();
+
+</script>
