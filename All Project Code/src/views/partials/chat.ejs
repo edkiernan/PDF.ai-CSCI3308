@@ -1,0 +1,34 @@
+<div className="chat">
+    <button
+        className="generate"
+        id="hoverable"
+    >
+        Generate
+    </button>
+    <%- include ('../partials/chatContainer.ejs') %>
+    <div className="chat-elements">
+        <input
+            type="text"
+            value={userMessage}
+        />
+        <button
+            id="hoverable"
+            disabled={!props.text || isGenerating}
+        >
+            Context?
+        </button>
+        <button
+            id="hoverable"
+            disabled={!props.text || isGenerating}
+        >
+            Send
+        </button>
+        <button
+            id="hoverable"
+            disabled={chatHistory.length === 0}
+        >
+            Clear
+        </button>
+
+    </div>
+</div>

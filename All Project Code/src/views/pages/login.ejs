@@ -1,32 +1,37 @@
 <%- include ('../partials/header') %>
-<%- include ('../partials/menu') %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('loginForm');
+    const passwordInput = document.getElementById('password');
+
+    passwordInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault(); // Prevent the default form submission
+        form.submit(); // Manually submit the form
+      }
+    });
+  });
+</script>
 
 <main>
-     <!-- form for styled with bootstrap -->
-     <div class="container mx-auto d-flex justify-content-center align-items-center" style="height: 75vh;">
-        <!-- api call -->
-      <form action="/login" method="post" style="text-align: center;">
-        <legend>Login</legend>
-        <!-- Email part of form -->
-        <div class="form-outline mb-4">
-          <input type="email" id="email" class="form-control" />
-          <label class="form-label" for="login">Email</label>
-        </div>
-        <!-- Password part of form -->
-        <div class="form-outline mb-4">
-          <input type="password" id="password" class="form-control"/>
-          <label class="form-label" for="login">Password</label>
-        </div>
-          <!-- Commented out code is another submit button. Ensure of functionality of current button. -->
-          <!-- <input type="submit" style="background-color:CadetBlue" value="Login"> -->
-          <button type="submit" class="btn btn-primary btn-block mb-4">Sign in</button>
-          <div class="col">
-            <!-- sends user to register page -->
-            <a href="register">No account? Click here to Register.</a>
-          </div>
-        </div>
-      </form>
-    </div>
-  </main>
+  <div class="container mx-auto d-flex justify-content-center align-items-center" style="height: 75vh;">
+    <form id="loginForm" action="/login" method="POST" style="text-align: center;">
+      <legend>Login</legend>
+      <div class="form-outline mb-4">
+        <input type="email" id="email" name="email" class="form-control" />
+        <label class="form-label" for="email">Email</label>
+      </div>
+      <div class="form-outline mb-4">
+        <input type="password" id="password" name="password" class="form-control"/>
+        <label class="form-label" for="password">Password</label>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block mb-4">Sign in</button>
+      <div class="col">
+        <a href="register">No account? Click here to Register.</a>
+      </div>
+    </form>
+  </div>
+</main>
 
 <%- include ('../partials/footer') %>
