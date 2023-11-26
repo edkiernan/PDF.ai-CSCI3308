@@ -9,17 +9,12 @@ const session = require('express-session'); // To set the session object. To sto
 const bcrypt = require('bcrypt'); //  To hash passwords
 const axios = require('axios'); // To make HTTP requests from our server. We'll learn more about it in Part B.
 const multer = require('multer');
-const { Storage } = require('@google-cloud/storage');
 const upload = multer({ dest: 'uploads/' });
-require('dotenv').config(); // To read the .env file
-const storage = new Storage();
-const bucketName = process.env.GCLOUD_STORAGE_BUCKET;
-const fs = require('fs');
+
 
 const { createMessage, fetchChatCompletion } = require('./utilities/message.js');
-// *****************************************************
-// <!-- Section 2 : Connect to DB -->
-// *****************************************************
+const { uploadPDF, downloadPDF } = require('./utilities/storageHandler.js');
+const { getTextFromPage } = require('./utilities/pdfUtil.js');
 
 // database configuration
 const dbConfig = {
@@ -94,7 +89,6 @@ app.get('/login', (req, res) => {
 // Post for login
 app.post('/login', async (req, res) => {
     try {
-        console.log(req.body)
 
         const { password, email } = req.body;
 
@@ -119,7 +113,7 @@ app.post('/login', async (req, res) => {
             req.session.save();
             res.redirect("/app");
         }
-        else{
+        else {
             throw new Error('Incorrect password. Try again');
         }
 
@@ -182,80 +176,138 @@ const auth = (req, res, next) => {
 //     res.render('pages/app', { user: { username: 'test_user' } });
 // });
 
+// app.post('/debug-upload-pdf', upload.single('pdfFile'), async (req, res) => {
+//     try {
+//         await uploadPDF(req.file, "test_user");
+//         res.status(200).json({ message: 'File uploaded and stored successfully!', fileName: req.file.originalname });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ message: 'An error occurred while uploading the file.' });
+//     }
+// });
+
+// app.get('/debug-get-pdf/:fileName', async (req, res) => {
+//     try {
+//         const [content] = await downloadPDF(req.params.fileName, "test_user");
+//         req.session.pdfBuffer = content;
+//         res.contentType('application/pdf');
+//         res.end(content, 'binary');
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).send('An error occurred while retrieving the file.');
+//     }
+// });
+
+// app.get('/debug-get-page-content/:fileName/:pageNumber', async (req, res) => {
+//     try {
+//         const content = await getTextFromPage(req.params.fileName, "test_user", req.params.pageNumber);
+//         res.status(200).json({ content });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).send('An error occurred while retrieving the file.');
+//     }
+// });
+
+// app.get('/debug-get-page-summary', async (req, res) => {
+//     // if (!req.session.pdfBuffer) {
+//     //     return res.status(400).json({ message: 'No PDF file has been uploaded yet.' });
+//     // }
+//     console.log("called")
+//     try {
+//         const pageNumber = req.query.pageNumber;
+//         let [pdfBuffer] = await downloadPDF("Text.pdf", "test_user");
+//         const pageText = await getTextFromPage(pdfBuffer, pageNumber);
+
+//         // Prepare AIChatHistory based on the received context and page text
+//         let AIChatHistory = [
+//             {
+//                 author: 'user',
+//                 content: `Summarize ${pageText}`, // You can modify this as needed
+//             },
+//         ];
+
+//         // Generate the summary using the provided function or model
+//         let summary = await fetchChatCompletion(AIChatHistory, true);
+
+//         let message = createMessage({isBot: true, textContent: summary});
+//         // Return the generated summary
+//         res.status(200).json({ summary, HTML: message });
+//     } catch (error) {
+//         console.error('Error generating summary:', error);
+//         return res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// });
+
 // Authentication Required
 app.use(auth); // Uncomment outside of testing
 
-app.get('/app', auth, (req, res) => {
-    res.render('pages/app', { user: req.session.user });
+// app.get('/app', auth, (req, res) => {
+//     res.render('pages/app', { username: req.session.user.username, pageNumber: 1 });
+// });
+
+app.get('/app', auth, (req, res) => { // debugging
+    res.render('pages/app', { username: req.session.user.username, pageNumber: 1 });
 });
 
 app.post('/upload-pdf', upload.single('pdfFile'), async (req, res) => {
-    let pdfFile = null;
     try {
-        const file = req.file;
-        if (!file) {
-            res.status(400).json({ message: 'No file uploaded.' });
-            return;
-        }
-        pdfFile = file.path;
-        const destination = `pdf_uploads/${req.session.user.username}/${file.originalname}`; // Define the destination path in the bucket
-        // const destination = `pdf_uploads/test_user/${file.originalname}`; // Testing purposes
-        // Upload the PDF file to Google Cloud Storage
-        await storage.bucket(bucketName).upload(pdfFile, {
-            destination: destination,
-            metadata: {
-                contentType: 'application/pdf' // Set the content type of the file
-            },
-        });
-        res.status(200).json({ message: 'File uploaded and stored successfully!', fileName: file.originalname });
-    }
-    catch (error) {
-        console.error('Error uploading file:', error);
+        await uploadPDF(req.file, req.session.user.username);
+        res.status(200).json({ message: 'File uploaded and stored successfully!', fileName: req.file.originalname });
+    } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'An error occurred while uploading the file.' });
-    } finally {
-        if (pdfFile) {
-            try {
-                await fs.promises.unlink(pdfFile); // Make sure to `require('fs').promises;`
-                console.log('Successfully deleted local file');
-            } catch (error) {
-                // Even if Google Cloud Storage upload was successful, log the error for the local file deletion.
-                console.error('Error deleting local file:', error);
-            }
-        }
     }
 });
 
 app.get('/get-pdf/:fileName', async (req, res) => {
-    const fileName = req.params.fileName; // Get the file name from the request parameters
-    const filePath = `pdf_uploads/${req.session.user.username}/${fileName}`; // Create a path to the file inside the bucket
-    // const filePath = `pdf_uploads/test_user/${fileName}`; // testing purposes
     try {
-        const file = storage.bucket(bucketName).file(filePath);
-
-        file.download((err, contents) => {
-            if (err && err.code === 404) {
-                console.error('File not found');
-                res.status(404).send('File not found.');
-            } else if (err) {
-                console.error('Error downloading file:', err);
-                res.status(500).send('An error occurred while retrieving the file.');
-            } else {
-                // Set the appropriate content type for PDF
-                res.contentType('application/pdf');
-                // Send the file contents as the response
-                res.send(contents);
-            }
-        });
+        const [content] = await downloadPDF(req.params.fileName, req.session.user.username);
+        req.session.pdfBuffer = content;
+        res.contentType('application/pdf');
+        // res.end(content, 'binary');
+        res.send(content);
     } catch (error) {
-        console.error('Error retrieving file:', error);
+        console.error(error);
         res.status(500).send('An error occurred while retrieving the file.');
+    }
+});
+
+
+
+
+app.get('/get-page-summary', async (req, res) => {
+    if (!req.session.pdfBuffer) {
+        return res.status(400).json({ message: 'No PDF file has been uploaded yet.' });
+    }
+    // console.log("called")
+    try {
+        // let [pdfBuffer] = await downloadPDF("Text.pdf", "test_user");
+        const pageText = await getTextFromPage(req.session.pdfBuffer, req.session.pageNumber);
+
+        // Prepare AIChatHistory based on the received context and page text
+        let AIChatHistory = [
+            {
+                author: 'user',
+                content: `Summarize ${pageText}`, // You can modify this as needed
+            },
+        ];
+
+        // Generate the summary using the provided function or model
+        let summary = await fetchChatCompletion(AIChatHistory, true);
+
+        let message = createMessage({isBot: true, textContent: summary});
+        // Return the generated summary
+        res.status(200).json({ summary, HTML: message });
+    } catch (error) {
+        console.error('Error generating summary:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 
 
 app.post('/get-chat-completion', async (req, res) => {
     try {
-        // sample chat json body
+
         // {
         //     "AIChatHistory" : [
         //         {
@@ -266,25 +318,36 @@ app.post('/get-chat-completion', async (req, res) => {
         //             role: 'bot',
         //             content: "bot response", 
         //         },
-        //         {
-        //             role: 'user',
-        //             content: "From {another context}: answer {prompt}",
-        //         }
         //     ],
-        //     "isSummary": false
-        // }
-        // sample summary json body
-        // {
-        //     "AIChatHistory" : [
-        //         {
-        //             role: 'user',
-        //             content: "Summarise {content}"
-        //         }
-        //     ],
-        //     "isSummary": true
+        //     "context": true,
+        //     "prompt": "answer {prompt}"
         // }
 
-        const {AIChatHistory, isSummary } = req.body;
+
+
+        const { AIChatHistory, context, prompt } = req.body;
+
+        const pageText = await getTextFromPage(req.session.pdfBuffer, req.session.pageNumber);
+        
+        // debug
+        // const [pdfBuffer] = await downloadPDF("Text.pdf", "test_user");
+        // const pageText = await getTextFromPage(pdfBuffer, 474);
+
+        // console.log(`Before: `)
+        // console.log(AIChatHistory)
+        if (context) {
+            AIChatHistory.push({
+                author: 'user',
+                content: `From ${pageText}: ${prompt}`, // You can modify this as needed
+            });
+        } else {
+            AIChatHistory.push({
+                author: 'user',
+                content: prompt, // You can modify this as needed
+            });
+        }
+        // console.log(`After: `)
+        // console.log(AIChatHistory)
 
         // Debug
         // let AIChatHistory = [
@@ -294,13 +357,22 @@ app.post('/get-chat-completion', async (req, res) => {
         //     },
         // ];
         // Generate the summary using the provided function or model
-        let response = await fetchChatCompletion(AIChatHistory, isSummary);
+        // console.log(AIChatHistory)
+        let response = await fetchChatCompletion(AIChatHistory, false);
+
+        AIChatHistory.push({
+            author: 'bot',
+            content: response,
+            citationMetadata: {
+                citations: []
+            }
+        });
 
         // Return the generated summary
-        res.status(200).json({ response });
+        res.status(200).json({ response, HTML: createMessage({ isBot: true, textContent: response }), AIChatHistory });
     } catch (error) {
         console.error('Error generating summary:', error);
-        return res.status(500).json({ error: 'Internal Server Error' });
+        return res.status(500).json({ response: 'Internal Server Error' });
     }
 
 });

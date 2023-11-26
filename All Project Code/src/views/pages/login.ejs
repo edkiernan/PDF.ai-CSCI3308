@@ -15,6 +15,11 @@
 </script>
 
 <main>
+  <% if (locals.message) { %>
+    <div class="alert alert-<%- locals.error ? 'danger' : 'success' %>" role="alert">
+        <%= message %>
+    </div>
+  <% } %>
   <div class="container mx-auto d-flex justify-content-center align-items-center" style="height: 75vh;">
     <form id="loginForm" action="/login" method="POST" style="text-align: center;">
       <legend>Login</legend>
