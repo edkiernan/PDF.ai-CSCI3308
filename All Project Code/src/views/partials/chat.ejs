@@ -1,35 +1,189 @@
-<div id="text-container">
+
+<div id="chat">
     <button
         class="generate"
         id="hoverable"
-        disabled=true
     >
         Generate
     </button>
-    <%- include ('../partials/chatContainer.ejs') %>
-    <div class="chat-elements">
+    <div id = "messages">
+        
+    </div>
+        
+    <div id="chat-elements">
         <input
+            class="user-input"
             type="text"
-            value={userMessage}
+            placeholder="Ask a question"
         />
         <button
+            class="context-toggle"
             id="hoverable"
-            disabled=true
         >
             Context?
         </button>
         <button
+            class="send"
             id="hoverable"
-            disabled=true
         >
             Send
         </button>
         <button
+            class="clear"
             id="hoverable"
-            disabled=true
         >
             Clear
         </button>
 
     </div>
 </div>
+<script>
+    let AIChatHistory = [];
+    let chatHistory = [];
+    let context = true;
+
+    const updateChat = () => {
+        console.log(chatHistory);
+        let chat = document.getElementById("messages");
+        chat.innerHTML = "";
+        for (let i = 0; i < chatHistory.length; i++) {
+            let message = document.createElement("div");
+            message.innerHTML = chatHistory[i];
+            message.setAttribute("key", i);
+            chat.appendChild(message);
+        }
+        chat.scrollTop = chat.scrollHeight;
+    }
+
+    const createMessage = (props) => {
+        const containerClass = props.isBot ? "bot-message-container" : "user-message-container";
+        const messageClass = props.isBot ? "bot-message" : "user-message";
+        const authorText = props.isBot ? "AI ✨" : "<%= username %>";
+
+        // Construct the HTML string
+        const html = 
+            `<div class="${containerClass}">
+                <div class="${messageClass}" id="message">
+                    <div class="author">
+                        ${authorText}
+                    </div>
+                    <div class="message-content">
+                        ${props.textContent}
+                    </div>
+                </div>
+            </div>`;
+
+        return html;
+    }
+
+    // Add an event listener to the button
+    document.querySelector('.generate').addEventListener('click', async () => {
+        try {
+            console.log("running");
+            // <% pageNumber = 474 %>
+            const response = await fetch(`/get-page-summary?pageNumber=<%= pageNumber %>`);
+            if (response.ok) {
+                const data = await response.json();
+                AIChatHistory.push({
+                    author: 'user',
+                    content: 'summarise the page'
+                });
+                AIChatHistory.push({
+                    author: 'bot',
+                    content: data.response,
+                    citationMetadata: {
+                        citations: []
+                    }
+                });
+                chatHistory.push(data.HTML)
+            } else {
+                // Handle the error response here
+                chatHistory.push(createMessage({
+                    isBot: true,
+                    textContent: "Could not generate summary"
+                }));
+            }
+        } catch (error) {
+            // Handle the error response here
+            chatHistory.push(createMessage({
+                isBot: true,
+                textContent: error
+            }));
+        } finally {
+            updateChat();
+        }
+    });
+
+    document.querySelector('.context-toggle').addEventListener('click',async () => {
+        context = !context;
+        if (!context) {
+            // add the class no-context to the button
+            document.querySelector('.context-toggle').classList.add('no-context');
+        } else {
+            // remove the class no-context from the button
+            document.querySelector('.context-toggle').classList.remove('no-context');
+        }
+    });
+
+    document.querySelector('.clear').addEventListener('click', async () => {
+        chatHistory = [];
+        updateChat();
+    });
+
+    document.querySelector('.send').addEventListener('click', async () => {
+        console.log("send");
+        const userInput = document.querySelector('.user-input').value;
+        chatHistory.push(createMessage({
+            isBot: false,
+            textContent: userInput
+        }));
+        document.querySelector('.user-input').value = "";
+        updateChat();
+
+        // get the response from the AI
+        try {
+            console.log("running");
+            console.log(AIChatHistory);
+            const response = await fetch('/get-chat-completion', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    AIChatHistory: AIChatHistory,
+                    context: context,
+
+                    prompt: userInput
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log(data);
+                AIChatHistory = data.AIChatHistory;
+                chatHistory.push(data.HTML);
+            } else {
+                // Handle the error response here
+                chatHistory.push(createMessage({
+                    isBot: true,
+                    textContent: "Could not generate response"
+                }));
+            }
+        } catch (error) {
+            // Handle the error response here
+            chatHistory.push(createMessage({
+                isBot: true,
+                textContent: error
+            }));
+        } finally {
+            updateChat();
+        }
+        // add the response to the chat history
+        // update the chat
+    });
+
+        
+
+
+    
+</script>

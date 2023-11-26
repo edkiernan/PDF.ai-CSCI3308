@@ -4,12 +4,13 @@
 const { downloadPDF } = require('./storageHandler.js');
 
 
-async function getTextFromPage(fileName, username, pageNumber) {
+
+async function getTextFromPage(pdfBuffer, pageNumber) {
     const pdfjsLib = await import('pdfjs-dist');
     try {
         pageNumber = parseInt(pageNumber);
         // Download the file into a buffer.
-        const [pdfBuffer] = await downloadPDF(fileName, username);
+        // const [pdfBuffer] = await downloadPDF(fileName, username);
 
         // Convert the buffer into a Uint8Array.
         const uint8Array = new Uint8Array(pdfBuffer);
@@ -17,7 +18,7 @@ async function getTextFromPage(fileName, username, pageNumber) {
         const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
         const pdfDocument = await loadingTask.promise;
 
-        console.log(`file: ${fileName}, numPages: ${pdfDocument.numPages}, getPage ${pageNumber}`)
+        // console.log(`file: {fileName}, numPages: ${pdfDocument.numPages}, getPage ${pageNumber}`)
 
         const page = await pdfDocument.getPage(pageNumber);
 
@@ -25,8 +26,8 @@ async function getTextFromPage(fileName, username, pageNumber) {
         const textItems = textContent.items.map(item => item.str).join(' ');
 
         // Output the text of the desired page
-        console.log(`Text from page ${pageNumber}:`);
-        console.log(textItems);
+        // console.log(`Text from page ${pageNumber}:`);
+        // console.log(textItems);
         return textItems;
 
     } catch (error) {

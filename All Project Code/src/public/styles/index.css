@@ -14,11 +14,25 @@
     --dark-background-color: #313435;
     --light-background-color: #eef1f2;
 }
+
+body {
+    color: #313435;
+    background-color: #eef1f2;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: all 0.2s ease-out;
+  }
   
-.container {
+#container {
     display: flex;
     height: 95vh; 
     margin: 10px 0px;
+    padding: 1vw
 }
 
 #pdf-container {
@@ -27,7 +41,7 @@
     background-color: var(--nav-color);
     padding: 1.5%;
     border-radius: calc(10px + 1.1vw);
-    width: fit-content;
+    width: auto;
 }
 
 button {
@@ -54,7 +68,7 @@ button:disabled {
     width: auto;
 }
 
-.pdf-container input {
+#pdf-container input {
     margin: 0 1.3% 2% 0;
     border: 0;
     border-radius: calc(8px + 0.3vw);
@@ -73,4 +87,100 @@ button:disabled {
 
 #hoverable {
     user-select: none;
+}
+
+#chat {
+    animation: fade-in 0.5s ease-in;
+    height: 86%;
+}
+
+.generate {
+    width: 100%;
+}
+
+#messages {
+    height: 98%;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    scroll-margin-bottom: 10px;
+    scroll-padding-bottom: 10px;
+}
+
+#chat input {
+    margin: 0 1.3% 2% 0;
+    border: 0;
+    border-radius: calc(8px + 0.3vw);
+    padding: 1.2% 1.5%;
+    background-color: var(--container-highlight-color);
+    font-size: calc(10px + 0.8vw);
+    color: inherit;
+    transition: all 0.2s ease-out;
+    width: auto;
+}
+
+input:disabled {
+    opacity: 0.4;
+}
+
+#message {
+    margin: 1% 0;
+    border-radius: calc(8px + 0.3vw);
+    width: fit-content;
+}
+
+.author {
+    font-size: 0.8vw;
+    opacity: 0.75;
+    margin-bottom: 1.2%;
+    padding: 0;
+}
+
+#message p {
+    font-size: 1.1vw;
+    margin: 0;
+    padding: 0;
+}
+
+#message ul {
+    margin: 0 0 0 2.1%;
+    padding: 0;
+    list-style-type: "- ";
+}
+
+#message li {
+    margin: 1% 0 1% 0;
+    font-size: 1.1vw;
+}
+
+.user-message {
+    background-color: var(--light-container-highlight-color);
+    color: var(--dark-background-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 1.5% 2.75% 1.5% 2.15%;
+
+}
+
+.user-message-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+
+.bot-message {
+    background-color: var(--container-highlight-color);
+    flex-direction: column;
+    padding: 1.5% 2.72% 1.5% 2.1%;
+}
+
+#chat-elements {
+    margin: 2% 0;
+    padding: 0;
+}
+
+.no-context {
+    background-color: red;
 }

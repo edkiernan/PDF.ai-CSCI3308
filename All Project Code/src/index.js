@@ -186,34 +186,91 @@ const auth = (req, res, next) => {
 //     }
 // });
 
-app.get('/debug-get-pdf/:fileName', async (req, res) => {
-    try {
-        const [content] = await downloadPDF(req.params.fileName, "test_user");
-        res.contentType('application/pdf');
-        res.end(content, 'binary');
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('An error occurred while retrieving the file.');
-    }
-});
+// app.get('/debug-get-pdf/:fileName', async (req, res) => {
+//     try {
+//         const [content] = await downloadPDF(req.params.fileName, "test_user");
+//         req.session.pdfBuffer = content;
+//         res.contentType('application/pdf');
+//         res.end(content, 'binary');
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).send('An error occurred while retrieving the file.');
+//     }
+// });
 
-app.get('/debug-get-page-content/:fileName/:pageNumber', async (req, res) => {
-    try {
-        const content = await getTextFromPage(req.params.fileName, "test_user", req.params.pageNumber);
-        res.status(200).json({ content });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('An error occurred while retrieving the file.');
-    }
-});
+// app.get('/debug-get-page-content/:fileName/:pageNumber', async (req, res) => {
+//     try {
+//         const content = await getTextFromPage(req.params.fileName, "test_user", req.params.pageNumber);
+//         res.status(200).json({ content });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).send('An error occurred while retrieving the file.');
+//     }
+// });
 
+// app.get('/debug-get-page-summary', async (req, res) => {
+//     // if (!req.session.pdfBuffer) {
+//     //     return res.status(400).json({ message: 'No PDF file has been uploaded yet.' });
+//     // }
+//     console.log("called")
+//     try {
+//         const pageNumber = req.query.pageNumber;
+//         let [pdfBuffer] = await downloadPDF("Text.pdf", "test_user");
+//         const pageText = await getTextFromPage(pdfBuffer, pageNumber);
 
+//         // Prepare AIChatHistory based on the received context and page text
+//         let AIChatHistory = [
+//             {
+//                 author: 'user',
+//                 content: `Summarize ${pageText}`, // You can modify this as needed
+//             },
+//         ];
+
+//         // Generate the summary using the provided function or model
+//         let summary = await fetchChatCompletion(AIChatHistory, true);
+
+//         let message = createMessage({isBot: true, textContent: summary});
+//         // Return the generated summary
+//         res.status(200).json({ summary, HTML: message });
+//     } catch (error) {
+//         console.error('Error generating summary:', error);
+//         return res.status(500).json({ error: 'Internal Server Error' });
+//     }
+// });
 
 // Authentication Required
 app.use(auth); // Uncomment outside of testing
 
-app.get('/app', auth, (req, res) => {
-    res.render('pages/app', { username: req.session.username });
+// app.get('/app', auth, (req, res) => {
+//     res.render('pages/app', { username: req.session.user.username, pageNumber: 1 });
+// });
+
+app.get('/app', auth, (req, res) => { // debugging
+    let chatHistory = [
+        `<div class="user-message-container">
+            <div class="user-message" id="message">
+                <div class="author">
+                    ${req.session.user.username}
+                </div>
+                <div class="message-content">
+                    user message 1
+                </div>
+            </div>
+        </div>`,
+        `<div class="bot-message-container">
+            <div class="bot-message" id="message">
+                <div class="author">
+                    AI ✨
+                </div>
+                <div class="message-content">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas at porttitor nibh. Nulla sit amet mattis elit, ac suscipit erat. Nulla odio nibh, rhoncus eget mattis at, porta eget ligula. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec metus tortor, malesuada in est eu, vehicula semper nisl. Aenean ut lobortis est. Integer urna ligula, varius in magna eget, aliquam laoreet risus. Maecenas elementum mi eget nulla scelerisque, sit amet porta diam viverra. Curabitur blandit elit quis lorem fermentum, a sodales ipsum vestibulum. Praesent non auctor nunc. Fusce pharetra in orci sit amet interdum.
+
+                    Cras dapibus dui id ex sollicitudin consequat. Etiam tristique nisl gravida, semper urna at, imperdiet ligula. Suspendisse potenti. Nulla imperdiet ligula at quam elementum elementum. Vestibulum sit amet consequat tortor. Suspendisse ex augue, rutrum eu dui quis, elementum bibendum nibh. Praesent lacinia porttitor urna eget feugiat. Fusce pretium commodo mi, quis pulvinar ante finibus at. Morbi rutrum, nisi bibendum cursus mattis, sapien sapien luctus eros, in feugiat est justo quis tortor. Nam congue enim at pellentesque facilisis. Cras sed mollis dolor, in pellentesque diam. Duis nisi nulla, cursus sit amet orci blandit, suscipit commodo odio. Mauris mollis pulvinar viverra.
+                </div>
+            </div>
+        </div>`
+    ]
+    res.render('pages/app', { username: req.session.user.username, pageNumber: 1, chatHistory, AIChatHistory: [] });
 });
 
 app.post('/upload-pdf', upload.single('pdfFile'), async (req, res) => {
@@ -228,7 +285,8 @@ app.post('/upload-pdf', upload.single('pdfFile'), async (req, res) => {
 
 app.get('/get-pdf/:fileName', async (req, res) => {
     try {
-        const content = await downloadPDF(req.params.fileName, req.session.user.username);
+        const [content] = await downloadPDF(req.params.fileName, req.session.user.username);
+        req.session.pdfBuffer = content;
         res.contentType('application/pdf');
         // res.end(content, 'binary');
         res.send(content);
@@ -238,9 +296,42 @@ app.get('/get-pdf/:fileName', async (req, res) => {
     }
 });
 
+
+
+
+app.get('/get-page-summary', async (req, res) => {
+    if (!req.session.pdfBuffer) {
+        return res.status(400).json({ message: 'No PDF file has been uploaded yet.' });
+    }
+    // console.log("called")
+    try {
+        // let [pdfBuffer] = await downloadPDF("Text.pdf", "test_user");
+        const pageText = await getTextFromPage(req.session.pdfBuffer, req.session.pageNumber);
+
+        // Prepare AIChatHistory based on the received context and page text
+        let AIChatHistory = [
+            {
+                author: 'user',
+                content: `Summarize ${pageText}`, // You can modify this as needed
+            },
+        ];
+
+        // Generate the summary using the provided function or model
+        let summary = await fetchChatCompletion(AIChatHistory, true);
+
+        let message = createMessage({isBot: true, textContent: summary});
+        // Return the generated summary
+        res.status(200).json({ summary, HTML: message });
+    } catch (error) {
+        console.error('Error generating summary:', error);
+        return res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
 app.post('/get-chat-completion', async (req, res) => {
     try {
-        // sample chat json body
+
         // {
         //     "AIChatHistory" : [
         //         {
@@ -251,25 +342,36 @@ app.post('/get-chat-completion', async (req, res) => {
         //             role: 'bot',
         //             content: "bot response", 
         //         },
-        //         {
-        //             role: 'user',
-        //             content: "From {another context}: answer {prompt}",
-        //         }
         //     ],
-        //     "isSummary": false
-        // }
-        // sample summary json body
-        // {
-        //     "AIChatHistory" : [
-        //         {
-        //             role: 'user',
-        //             content: "Summarise {content}"
-        //         }
-        //     ],
-        //     "isSummary": true
+        //     "context": true,
+        //     "prompt": "answer {prompt}"
         // }
 
-        const { AIChatHistory, isSummary } = req.body;
+
+
+        const { AIChatHistory, context, prompt } = req.body;
+
+        const pageText = await getTextFromPage(req.session.pdfBuffer, req.session.pageNumber);
+        
+        // debug
+        // const [pdfBuffer] = await downloadPDF("Text.pdf", "test_user");
+        // const pageText = await getTextFromPage(pdfBuffer, 474);
+
+        // console.log(`Before: `)
+        // console.log(AIChatHistory)
+        if (context) {
+            AIChatHistory.push({
+                author: 'user',
+                content: `From ${pageText}: ${prompt}`, // You can modify this as needed
+            });
+        } else {
+            AIChatHistory.push({
+                author: 'user',
+                content: prompt, // You can modify this as needed
+            });
+        }
+        // console.log(`After: `)
+        // console.log(AIChatHistory)
 
         // Debug
         // let AIChatHistory = [
@@ -279,13 +381,22 @@ app.post('/get-chat-completion', async (req, res) => {
         //     },
         // ];
         // Generate the summary using the provided function or model
-        let response = await fetchChatCompletion(AIChatHistory, isSummary);
+        // console.log(AIChatHistory)
+        let response = await fetchChatCompletion(AIChatHistory, false);
+
+        AIChatHistory.push({
+            author: 'bot',
+            content: response,
+            citationMetadata: {
+                citations: []
+            }
+        });
 
         // Return the generated summary
-        res.status(200).json({ response });
+        res.status(200).json({ response, HTML: createMessage({ isBot: true, textContent: response }), AIChatHistory });
     } catch (error) {
         console.error('Error generating summary:', error);
-        return res.status(500).json({ error: 'Internal Server Error' });
+        return res.status(500).json({ response: 'Internal Server Error' });
     }
 
 });

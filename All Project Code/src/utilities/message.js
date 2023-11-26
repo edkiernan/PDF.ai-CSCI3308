@@ -18,9 +18,9 @@ function createMessage(props) {
     const authorText = props.isBot ? "AI ✨" : props.author;
 
     // Construct the HTML string
-    const html = `
-        <div class="${containerClass}">
-            <div class="${messageClass}" id="msg${props.messageId}">
+    const html = 
+        `<div class="${containerClass}">
+            <div class="${messageClass}" id="message">
                 <div class="author">
                     ${authorText}
                 </div>
@@ -28,8 +28,7 @@ function createMessage(props) {
                     ${props.textContent}
                 </div>
             </div>
-        </div>
-    `;
+        </div>`;
 
     return html;
 }
@@ -45,14 +44,16 @@ const fetchChatCompletion = async (AIChatHistory, isSummary) => {
         "Content-Type": "application/json",
     };
 
+    console.log(AIChatHistory)
     let data;
     if (!isSummary) {
+        // console.log("chat")
         data = {
             instances: [
                 {
                     // This context is different from the context in index.js. This context is guidance for the bot
                     context: "Your job is to provide concise responses and answers to what the user asks. If the user is asking about the summary or content, prioritise answering with information given. Format responses to be as readible as possible, if there are sub topics/topics bold the name of the sub topic/topic. Give response in markdown format.",
-                    messages: AIChatHistory,
+                    messages: AIChatHistory
                 },
             ],
             parameters: {
@@ -63,6 +64,7 @@ const fetchChatCompletion = async (AIChatHistory, isSummary) => {
             },
         };
     } else {
+        // console.log("summary")
         data = {
             instances: [
                 {
@@ -77,7 +79,8 @@ const fetchChatCompletion = async (AIChatHistory, isSummary) => {
             },
         };
     } 
-    
+    // console.log(AIChatHistory)
+    // console.log(data)
     const response = await fetch(URL, {
         method: "POST",
         headers,
@@ -85,6 +88,7 @@ const fetchChatCompletion = async (AIChatHistory, isSummary) => {
     });
     if (!response.ok) {
         console.error(response.statusText);
+        // console.log(response)
         throw new Error("Request failed " + response.statusText);
     }
     const result = await response.json();
