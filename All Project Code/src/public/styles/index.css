@@ -30,7 +30,7 @@ body {
   
 #container {
     display: flex;
-    height: 95vh; 
+    height: 100vh; 
     margin: 10px 0px;
     padding: 1vw
 }
@@ -105,7 +105,7 @@ button:disabled {
 
 #messages {
     height: 98%;
-    overflow-y: auto;
+    overflow-x: auto;
     scroll-behavior: smooth;
     scroll-margin-bottom: 10px;
     scroll-padding-bottom: 10px;
