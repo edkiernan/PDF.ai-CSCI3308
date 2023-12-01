@@ -246,7 +246,7 @@ app.use(auth); // Uncomment outside of testing
 // });
 
 app.get('/app', auth, async (req, res) => { // debugging
-    let fileName = "Text.pdf";
+    let fileName = "HW7_F23_JIANG_WEI.pdf";
     res.render('pages/app', { username: req.session.user.username, pageNumber: 1, fileName });
 });
 

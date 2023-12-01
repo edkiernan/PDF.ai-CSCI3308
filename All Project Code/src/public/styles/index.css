@@ -44,6 +44,11 @@ body {
     width: auto;
 }
 
+#pdf-element {
+    overflow-y: auto;
+    height: 92%;
+}
+
 button {
     margin: 0 1.3% 2% 0;
     border: 0;
@@ -65,7 +70,7 @@ button:disabled {
     background-color: var(--nav-color);
     padding: 1.5%;
     border-radius: calc(10px + 1.1vw);
-    width: auto;
+    width: 60vw;
 }
 
 #pdf-container input {
