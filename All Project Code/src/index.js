@@ -245,8 +245,9 @@ app.use(auth); // Uncomment outside of testing
 //     res.render('pages/app', { username: req.session.user.username, pageNumber: 1 });
 // });
 
-app.get('/app', auth, (req, res) => { // debugging
-    res.render('pages/app', { username: req.session.user.username, pageNumber: 1 });
+app.get('/app', auth, async (req, res) => { // debugging
+    let fileName = "Text.pdf";
+    res.render('pages/app', { username: req.session.user.username, pageNumber: 1, fileName });
 });
 
 app.post('/upload-pdf', upload.single('pdfFile'), async (req, res) => {

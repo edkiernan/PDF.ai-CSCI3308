@@ -4,77 +4,158 @@
     <button class="nav-button" id="next-page">Next Page</button>
     <input type="text" />
     <button class="nav-button" id="go-button">Go</button>
+    <div id="pdf-element">Loading PDF Document</div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.js"></script>
 <script>
+    let pageNumber = 1;
 
-    let pdfBuffer = <%= pdfBuffer %>;
-    let pageNumber = <%= pageNumber %>;
-    let maxNumPages = await getMaxNumPages(pdfBuffer, pageNumber);
+    // Get the PDF buffer from the server
+    // let [pdfBuffer];
 
-    async function showPDFPage(pdfBuffer, pageNumber) {
-    const loadingTask = pdfjsLib.getDocument({data: pdfBuffer});
-    const pdf = await loadingTask.promise;
-    const page = await pdf.getPage(pageNumber);
-    const scale = 1.5; // Adjust scale to your preference
-    const viewport = page.getViewport({scale: scale});
+    // fetch('/get-pdf/:fileName')  //replace :fileName with the actual filename you want to request
+    // .then(response => {
+    //     if (!response.ok) {
+    //         throw new Error('Network response was not ok');
+    //     }
+    //     return response.blob();
+    // })
+    // .then(blob => {
+    //     pdfBuffer = blob;
+    //     // pdfBuffer contains the PDF content you can use with PDF.js or similar
+    // })
+    // .catch(error => {
+    //   console.error('Error:', error);
+    // });
 
-    // Prepare canvas using PDF page dimensions
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-    canvas.height = viewport.height;
-    canvas.width = viewport.width;
+    let maxNumPages = 0;
 
-    // Render PDF page into canvas context
-    const renderContext = {
-        canvasContext: context,
-        viewport: viewport
-    };
-    await page.render(renderContext).promise;
+    const pdfUrl = '/get-pdf/<%= fileName %>';
 
-    // Display the canvas in the pdf-document div
-    const pdfContainer = document.querySelector('.pdf-document');
-    pdfContainer.innerHTML = ''; // Clear any previous content
-    pdfContainer.appendChild(canvas);
-}
+    let pdfBuffer;
 
-//Previous Page
-document.getElementById('previous-page').addEventListener('click', async function () {
-    if (pageNumber > 1) {
-        pageNumber -= 1;
-        showPDFPage(pdfBuffer, pageNumber);
+    const showPDFPage = (pdf, pageNumber) => {
+        console.log("loading")
+
+        // clear the container
+        document.getElementById('pdf-element').innerHTML = '';
+        // Fetch the first page
+        pdf.getPage(pageNumber).then(function(page) {
+            var scale = 1.5;
+            var viewport = page.getViewport({ scale: scale });
+
+            // Create a new canvas element
+            var canvas = document.createElement('canvas');
+            // Optionally set an ID or class for the new canvas if needed
+            // canvas.id = 'new-canvas-id';
+            // canvas.className = 'pdf-canvas-class';
+
+            var context = canvas.getContext('2d');
+            // Make sure the canvas context was correctly obtained
+            if (!context) {
+                console.error('Unable to get 2D context from canvas');
+                return;
+            }
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            // Get the container where you want to append the canvas
+            var container = document.getElementById('pdf-element');
+            // Ensure the container exists before trying to append to it
+            if (!container) {
+                console.error('Unable to find the container to append the canvas to');
+                return;
+            }
+            // Append the new canvas to the container
+            container.appendChild(canvas);
+
+            // Render PDF page into canvas context
+            var renderContext = {
+                canvasContext: context,
+                viewport: viewport
+            };
+            page.render(renderContext).promise.then(function() {
+                console.log('Page rendered');
+            });
+        });
     }
-    else {
-        alert("Not a valid page number")
-    }
-});
 
-//Next Page
-document.getElementById('next-page').addEventListener('click', async function () {
-    if (pageNumber < maxNumPages) {
-        pageNumber += 1;
-        showPDFPage(pdfBuffer, pageNumber);
-    }
-    else {
-        alert("Not a valid page number")
-    }
-});
+    var loadingTask = pdfjsLib.getDocument(pdfUrl);
+    loadingTask.promise.then(function(pdf) {
+        pdfBuffer = pdf;
+        showPDFPage(pdf, pageNumber);
+        maxNumPages = pdf.numPages;
+    });
 
-//Go button
-document.getElementById('go-button').addEventListener('click', async function() {
-    let inputPage = parseInt(document.getElementById('input-page').value);
 
-    // check if input is a number and within range
-    if(!isNaN(inputPage) && inputPage > 0 && inputPage <= maxNumPages) {
-        pageNumber = inputPage;
-        showPDFPage(pdfBuffer, pageNumber);
-    } 
-    else {
-        alert("Not a valid page number");
-    }
-});
 
-// Call the function with the buffer and page number
-showPDFPage(pdfBuffer, pageNumber);
+    // async function showPDFPage(pdfBuffer, pageNumber) {
+    
+    //     const uint8Array = new Uint8Array(pdfBuffer);
+    //     const loadingTask = pdfjsLib.getDocument({data: uint8Array});
+    //     const pdf = await loadingTask.promise;
+    //     const page = await pdf.getPage(pageNumber);
+    //     maxNumPages = pdf.numPages;
+    //     const scale = 1.5; // Adjust scale to your preference
+    //     const viewport = page.getViewport({scale: scale});
+
+    //     // Prepare canvas using PDF page dimensions
+    //     const canvas = document.createElement('canvas');
+    //     const context = canvas.getContext('2d');
+    //     canvas.height = viewport.height;
+    //     canvas.width = viewport.width;
+
+    //     // Render PDF page into canvas context
+    //     const renderContext = {
+    //         canvasContext: context,
+    //         viewport: viewport
+    //     };
+    //     await page.render(renderContext).promise;
+
+    //     // Display the canvas in the pdf-document div
+    //     const pdfContainer = document.querySelector('.pdf-document');
+    //     pdfContainer.innerHTML = ''; // Clear any previous content
+    //     pdfContainer.appendChild(canvas);
+    // }
+
+    // //Previous Page
+    // document.getElementById('previous-page').addEventListener('click', async function () {
+    //     if (pageNumber > 1) {
+    //         pageNumber -= 1;
+    //         showPDFPage(pdfBuffer, pageNumber);
+    //     }
+    //     else {
+    //         alert("Not a valid page number")
+    //     }
+    // });
+
+    //Next Page
+    document.getElementById('next-page').addEventListener('click', async function () {
+        if (pageNumber < maxNumPages) {
+            pageNumber += 1;
+            showPDFPage(pdf, pageNumber);
+        }
+        else {
+            alert("Not a valid page number")
+        }
+    });
+
+    //Go button
+    document.getElementById('go-button').addEventListener('click', async function() {
+        let inputPage = parseInt(document.getElementById('input-page').value);
+
+        // check if input is a number and within range
+        if(!isNaN(inputPage) && inputPage > 0 && inputPage <= maxNumPages) {
+            pageNumber = inputPage;
+            showPDFPage(pdf, pageNumber);
+        } 
+        else {
+            alert("Not a valid page number");
+        }
+    });
+
+    // Call the function with the buffer and page number
+    // showPDFPage(pdfBuffer, pageNumber);
 
 </script>
