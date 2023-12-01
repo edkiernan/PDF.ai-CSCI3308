@@ -1,69 +1,163 @@
-<div id="pdf-container">
-    <button class="page-indicator" disabled>Page NA of NA</button>
-    <button class="nav-button" id="previous-page">
-        <!-- Previous Page -->
-    </button>
-    <button class="nav-button" id="next-page">
-        <!-- Next Page -->
-    </button>
-    <h3>test content</h3>
-    <input type="text" />
-    <button class="nav-button" id="go-button">
-        <!-- Go -->
-    </button>
-</div>
+<button class="page-indicator" disabled>Page NA of NA</button>
+<button class="nav-button" id="previous-page">Previous Page</button>
+<button class="nav-button" id="next-page">Next Page</button>
+<input id="input-page" type="text" />
+<button class="nav-button" id="go-button">Go</button>
+<div id="pdf-element">Loading PDF Document</div>
 
-<script src = "/All Project Code/src/utilities/pdfUtil.js">
-    // Adding functionality to all the buttons on click
-    
-    let pageNumber = 1; //initial page number
-    let maxNumPages = await getMaxNumPages(pdfBuffer, pageNumber); //initialize max pages
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.js"></script>
+<script>
+    let pageNumber = 1;
+    let maxNumPages = 0;
+    const pdfUrl = '/get-pdf/<%= fileName %>';
+    let pdfBuffer;
+    let scale = 0.8;
+    let initialResize = false;
 
-    //updating page content based on page number
-    function updatePageContent() {
-        //request to fetch AI summary
-        fetch(`/get-page-summary?pageNumber=${pageNumber}`)
-        .then(response => response.json())
-        .then(data => {
-            //actually updating the content 
-            document.getElementById('page-indicator').innerText = `Page ${pageNumber} of NA`;
-            document.getElementById('content').innerText = data.summary;
-        })
-        .catch(error => console.error('Error fetching content: ', error));
-    }
+    // This function updates the PDF scale and viewport based on container width
+    const resizePDF = (pdf) => {
+        const container = document.getElementById('pdf-element');
+        if (container) {
+            // Assume we want to fit the PDF width to the container's width
+            const containerWidth = container.clientWidth;
+            const canvas = container.querySelector('canvas');
 
-    //Previous Page functionality
-    document.getElementById('previous-page').addEventListener('click', async function () {
-        //decreasing the page number if not already at minimum
-        if (pageNumber > 1) {
-            pageNumber -= 1;
-            updatePageContent();
+            if (canvas) {
+                // Get the first page to calculate scale based on container width
+                pdf.getPage(1).then((page) => {
+                    const viewport = page.getViewport({ scale: 1 });
+                    const desiredWidth = containerWidth;
+                    scale = desiredWidth / viewport.width;
+
+                    showPDFPage(pdf, pageNumber);
+                });
+            }
         }
+    };
+
+    const renderPage = (page, container) => {
+        const scale = window.devicePixelRatio || 1; // Use the device pixel ratio to support high-DPI displays
+        const viewport = page.getViewport({ scale: 1 }); // Get viewport at unscaled resolution
+        
+        // Use the calculated scale to adjust the dimensions of the viewport
+        const scaledViewport = page.getViewport({ scale: scale * (container.clientWidth / viewport.width) });
+
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        if (!context) {
+            console.error('Unable to get 2D context from canvas');
+            return;
+        }
+
+        // Adjust the size of the canvas based on the scaling
+        canvas.width = scaledViewport.width;
+        canvas.height = scaledViewport.height;
+
+        // Adjust the style of the canvas to match the container's width but account for the high DPI
+        canvas.style.width = `${scaledViewport.width / scale}px`;
+        canvas.style.height = `${scaledViewport.height / scale}px`;
+
+        container.innerHTML = ''; // Clear any existing content
+        container.appendChild(canvas);
+
+        const renderContext = {
+            canvasContext: context,
+            viewport: scaledViewport,
+        };
+
+        page.render(renderContext).promise.then(() => {
+            if (!initialResize) {
+            resizePDF(pdfBuffer); // You may need to pass the pageNumber to resizePDF as well
+            initialResize = true;
+            }
+        });
+        };
+
+    const showPDFPage = (pdf, pageNumber) => {
+
+        const container =
+            document.getElementById('pdf-element');
+
+        if (!container) {
+            console.error('Unable to find the container to append the canvas to');
+            return;
+        }
+
+        pdf.getPage(pageNumber).then((page) => {
+            renderPage(page, container);
+        });
+    };
+
+    const updatePageIndicator = () => {
+        const pageIndicator = document.querySelector('.page-indicator');
+        if (pageIndicator) {
+            pageIndicator.innerHTML = `Page ${pageNumber} of ${maxNumPages}`;
+        }
+    };
+
+    const updatePageNumber = async () => {
+        const response = await fetch(`/update-page-number`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ pageNumber })
+        });
+
+        if (!response.ok) {
+            console.error('Unable to update page number');
+        }
+    };
+
+    pdfjsLib.getDocument(pdfUrl).promise.then(function (pdf) {
+        pdfBuffer = pdf;
+        maxNumPages = pdf.numPages;
+        showPDFPage(pdf, pageNumber);
+        window.addEventListener('resize', () => resizePDF(pdfBuffer));
     });
 
-    //Next Page functionality
+    //Next Page
     document.getElementById('next-page').addEventListener('click', async function () {
-        //increasing page number
-        //max page number function made in pdfUtil.js
         if (pageNumber < maxNumPages) {
             pageNumber += 1;
-            updatePageContent();
+            updatePageNumber();
+            showPDFPage(pdfBuffer, pageNumber);
+        }
+        else {
+            alert("Not a valid page number")
         }
     });
 
-    //Go button functionality
-    document.getElementById('go-button').addEventListener('click', async function () {
-        //request to fetch AI summary
-        fetch(`/get-page-summary?pageNumber=${pageNumber}`)
-        .then(response => response.json())
-        .then(data => {
-            //updating content with AI summary
-            document.getElementById('content').innerText = data.summary;
-        })
-        .catch(error => console.error('Error fetching AI summary:', error));
+    //Previous Page
+    document.getElementById('previous-page').addEventListener('click', async function () {
+        if (pageNumber > 1) {
+            pageNumber -= 1;
+            updatePageNumber();
+            showPDFPage(pdfBuffer, pageNumber);
+        }
+        else {
+            alert("Not a valid page number")
+        }
     });
 
-    //intial content update
-    updatePageContent();
+    //Go button
+    document.getElementById('go-button').addEventListener('click', async function () {
+        let inputPage = parseInt(document.getElementById('input-page').value);
+
+        // check if input is a number and within range
+        if (!isNaN(inputPage) && inputPage > 0 && inputPage <= maxNumPages) {
+            pageNumber = inputPage;
+            updatePageNumber();
+            showPDFPage(pdfBuffer, pageNumber);
+            // clear the input field
+            document.getElementById('input-page').value = "";
+        }
+        else {
+            alert("Not a valid page number");
+        }
+    });
+
+    // Call the function with the buffer and page number
+    // showPDFPage(pdfBuffer, pageNumber);
 
 </script>

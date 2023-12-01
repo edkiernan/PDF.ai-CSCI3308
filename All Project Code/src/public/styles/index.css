@@ -30,7 +30,7 @@ body {
   
 #container {
     display: flex;
-    height: 95vh; 
+    height: 100vh; 
     margin: 10px 0px;
     padding: 1vw
 }
@@ -47,6 +47,11 @@ body {
     padding: 1.5%;
     border-radius: calc(10px + 1.1vw);
     width: auto;
+}
+
+#pdf-element {
+    overflow-y: auto;
+    height: 92%;
 }
 
 button {
@@ -70,7 +75,7 @@ button:disabled {
     background-color: var(--nav-color);
     padding: 1.5%;
     border-radius: calc(10px + 1.1vw);
-    width: auto;
+    width: 60vw;
 }
 
 #pdf-container input {
@@ -105,7 +110,7 @@ button:disabled {
 
 #messages {
     height: 98%;
-    overflow-y: auto;
+    overflow-x: auto;
     scroll-behavior: smooth;
     scroll-margin-bottom: 10px;
     scroll-padding-bottom: 10px;

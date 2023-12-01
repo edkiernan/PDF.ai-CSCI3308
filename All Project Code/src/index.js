@@ -245,8 +245,9 @@ app.use(auth); // Uncomment outside of testing
 //     res.render('pages/app', { username: req.session.user.username, pageNumber: 1 });
 // });
 
-app.get('/app', auth, (req, res) => { // debugging
-    res.render('pages/app', { username: req.session.user.username, pageNumber: 1 });
+app.get('/app', auth, async (req, res) => { // debugging
+    let fileName = "Text.pdf";
+    res.render('pages/app', { username: req.session.user.username, pageNumber: 1, fileName });
 });
 
 app.post('/upload-pdf', upload.single('pdfFile'), async (req, res) => {
@@ -261,11 +262,14 @@ app.post('/upload-pdf', upload.single('pdfFile'), async (req, res) => {
 
 app.get('/get-pdf/:fileName', async (req, res) => {
     try {
-        const [content] = await downloadPDF(req.params.fileName, req.session.user.username);
-        req.session.pdfBuffer = content;
+        const content = await downloadPDF(req.params.fileName, req.session.user.username);
+        req.session.pdfBuffer = content[0].toString('base64');
+        req.session.pageNumber = 1;
+        req.session.fileName = req.params.fileName;
+        req.session.save();
         res.contentType('application/pdf');
         // res.end(content, 'binary');
-        res.send(content);
+        res.send(content[0]);
     } catch (error) {
         console.error(error);
         res.status(500).send('An error occurred while retrieving the file.');
@@ -281,9 +285,11 @@ app.get('/get-page-summary', async (req, res) => {
     }
     // console.log("called")
     try {
-        // let [pdfBuffer] = await downloadPDF("Text.pdf", "test_user");
-        const pageText = await getTextFromPage(req.session.pdfBuffer, req.session.pageNumber);
+        // let [pdfBuffer] = await downloadPDF(req.session.fileName, req.session.user.username);
+        let pdfBuffer = Buffer.from(req.session.pdfBuffer, 'base64');
+        const pageText = await getTextFromPage(pdfBuffer, req.session.pageNumber);
 
+        // console.log(pageText.length)
         // Prepare AIChatHistory based on the received context and page text
         let AIChatHistory = [
             {
@@ -295,9 +301,11 @@ app.get('/get-page-summary', async (req, res) => {
         // Generate the summary using the provided function or model
         let summary = await fetchChatCompletion(AIChatHistory, true);
 
+        // let summary = "debugging summary"
+
         let message = createMessage({isBot: true, textContent: summary});
         // Return the generated summary
-        res.status(200).json({ summary, HTML: message });
+        res.status(200).json({ response: summary, HTML: message });
     } catch (error) {
         console.error('Error generating summary:', error);
         return res.status(500).json({ error: 'Internal Server Error' });
@@ -323,11 +331,11 @@ app.post('/get-chat-completion', async (req, res) => {
         //     "prompt": "answer {prompt}"
         // }
 
-
-
         const { AIChatHistory, context, prompt } = req.body;
 
-        const pageText = await getTextFromPage(req.session.pdfBuffer, req.session.pageNumber);
+        let pdfBuffer = Buffer.from(req.session.pdfBuffer, 'base64');
+
+        const pageText = await getTextFromPage(pdfBuffer, req.session.pageNumber);
         
         // debug
         // const [pdfBuffer] = await downloadPDF("Text.pdf", "test_user");
@@ -388,6 +396,17 @@ app.get('/getMaxPages', async (req, res) => {
 
         // Send the response with the maximum number of pages
         res.status(200).json({ maxPages });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'An error occurred while processing the request' });
+    }
+});
+
+app.put('/update-page-number', async (req, res) => {
+    try {
+        const { pageNumber } = req.body;
+        req.session.pageNumber = pageNumber;
+        res.status(200).json({ message: 'Page number updated successfully!' });
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'An error occurred while processing the request' });

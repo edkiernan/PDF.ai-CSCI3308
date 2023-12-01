@@ -40,7 +40,7 @@
     let context = true;
 
     const updateChat = () => {
-        console.log(chatHistory);
+        // console.log(chatHistory);
         let chat = document.getElementById("messages");
         chat.innerHTML = "";
         for (let i = 0; i < chatHistory.length; i++) {
@@ -76,9 +76,8 @@
     // Add an event listener to the button
     document.querySelector('.generate').addEventListener('click', async () => {
         try {
-            console.log("running");
             // <% pageNumber = 474 %>
-            const response = await fetch(`/get-page-summary?pageNumber=<%= pageNumber %>`);
+            const response = await fetch(`/get-page-summary`);
             if (response.ok) {
                 const data = await response.json();
                 AIChatHistory.push({
@@ -124,11 +123,12 @@
 
     document.querySelector('.clear').addEventListener('click', async () => {
         chatHistory = [];
+        AIChatHistory = [];
         updateChat();
     });
 
     document.querySelector('.send').addEventListener('click', async () => {
-        console.log("send");
+        ("send");
         const userInput = document.querySelector('.user-input').value;
         chatHistory.push(createMessage({
             isBot: false,
@@ -139,8 +139,8 @@
 
         // get the response from the AI
         try {
-            console.log("running");
-            console.log(AIChatHistory);
+            // console.log("running");
+            // console.log(AIChatHistory);
             const response = await fetch('/get-chat-completion', {
                 method: 'POST',
                 headers: {
@@ -156,7 +156,7 @@
 
             if (response.ok) {
                 const data = await response.json();
-                console.log(data);
+                // console.log(data);
                 AIChatHistory = data.AIChatHistory;
                 chatHistory.push(data.HTML);
             } else {
