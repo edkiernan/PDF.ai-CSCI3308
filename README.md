@@ -19,4 +19,4 @@ PDF.ai is a pdf summarizing application in which users can upload a PDF to be su
 ## How to run the tests
 (TBD)
 ## Link to the deployed application
-(TBD)
+http://recitation-14-team-03.eastus.cloudapp.azure.com:3000/
