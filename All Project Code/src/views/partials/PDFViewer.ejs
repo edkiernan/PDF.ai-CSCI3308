@@ -1,69 +1,80 @@
 <div id="pdf-container">
     <button class="page-indicator" disabled>Page NA of NA</button>
-    <button class="nav-button" id="previous-page">
-        <!-- Previous Page -->
-    </button>
-    <button class="nav-button" id="next-page">
-        <!-- Next Page -->
-    </button>
-    <h3>test content</h3>
+    <button class="nav-button" id="previous-page">Previous Page</button>
+    <button class="nav-button" id="next-page">Next Page</button>
     <input type="text" />
-    <button class="nav-button" id="go-button">
-        <!-- Go -->
-    </button>
+    <button class="nav-button" id="go-button">Go</button>
 </div>
 
-<script src = "/All Project Code/src/utilities/pdfUtil.js">
-    // Adding functionality to all the buttons on click
-    
-    let pageNumber = 1; //initial page number
-    let maxNumPages = await getMaxNumPages(pdfBuffer, pageNumber); //initialize max pages
+<script>
 
-    //updating page content based on page number
-    function updatePageContent() {
-        //request to fetch AI summary
-        fetch(`/get-page-summary?pageNumber=${pageNumber}`)
-        .then(response => response.json())
-        .then(data => {
-            //actually updating the content 
-            document.getElementById('page-indicator').innerText = `Page ${pageNumber} of NA`;
-            document.getElementById('content').innerText = data.summary;
-        })
-        .catch(error => console.error('Error fetching content: ', error));
+    let pdfBuffer = <%= pdfBuffer %>;
+    let pageNumber = <%= pageNumber %>;
+    let maxNumPages = await getMaxNumPages(pdfBuffer, pageNumber);
+
+    async function showPDFPage(pdfBuffer, pageNumber) {
+    const loadingTask = pdfjsLib.getDocument({data: pdfBuffer});
+    const pdf = await loadingTask.promise;
+    const page = await pdf.getPage(pageNumber);
+    const scale = 1.5; // Adjust scale to your preference
+    const viewport = page.getViewport({scale: scale});
+
+    // Prepare canvas using PDF page dimensions
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    // Render PDF page into canvas context
+    const renderContext = {
+        canvasContext: context,
+        viewport: viewport
+    };
+    await page.render(renderContext).promise;
+
+    // Display the canvas in the pdf-document div
+    const pdfContainer = document.querySelector('.pdf-document');
+    pdfContainer.innerHTML = ''; // Clear any previous content
+    pdfContainer.appendChild(canvas);
+}
+
+//Previous Page
+document.getElementById('previous-page').addEventListener('click', async function () {
+    if (pageNumber > 1) {
+        pageNumber -= 1;
+        showPDFPage(pdfBuffer, pageNumber);
     }
+    else {
+        alert("Not a valid page number")
+    }
+});
 
-    //Previous Page functionality
-    document.getElementById('previous-page').addEventListener('click', async function () {
-        //decreasing the page number if not already at minimum
-        if (pageNumber > 1) {
-            pageNumber -= 1;
-            updatePageContent();
-        }
-    });
+//Next Page
+document.getElementById('next-page').addEventListener('click', async function () {
+    if (pageNumber < maxNumPages) {
+        pageNumber += 1;
+        showPDFPage(pdfBuffer, pageNumber);
+    }
+    else {
+        alert("Not a valid page number")
+    }
+});
 
-    //Next Page functionality
-    document.getElementById('next-page').addEventListener('click', async function () {
-        //increasing page number
-        //max page number function made in pdfUtil.js
-        if (pageNumber < maxNumPages) {
-            pageNumber += 1;
-            updatePageContent();
-        }
-    });
+//Go button
+document.getElementById('go-button').addEventListener('click', async function() {
+    let inputPage = parseInt(document.getElementById('input-page').value);
 
-    //Go button functionality
-    document.getElementById('go-button').addEventListener('click', async function () {
-        //request to fetch AI summary
-        fetch(`/get-page-summary?pageNumber=${pageNumber}`)
-        .then(response => response.json())
-        .then(data => {
-            //updating content with AI summary
-            document.getElementById('content').innerText = data.summary;
-        })
-        .catch(error => console.error('Error fetching AI summary:', error));
-    });
+    // check if input is a number and within range
+    if(!isNaN(inputPage) && inputPage > 0 && inputPage <= maxNumPages) {
+        pageNumber = inputPage;
+        showPDFPage(pdfBuffer, pageNumber);
+    } 
+    else {
+        alert("Not a valid page number");
+    }
+});
 
-    //intial content update
-    updatePageContent();
+// Call the function with the buffer and page number
+showPDFPage(pdfBuffer, pageNumber);
 
 </script>
