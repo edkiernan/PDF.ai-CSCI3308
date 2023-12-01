@@ -35,6 +35,11 @@ body {
     padding: 1vw
 }
 
+.content-padding {
+    padding: 10px;
+    overflow:hidden;
+}
+
 #pdf-container {
     flex: 1;
     margin: 10px 10px 5% 0px;
