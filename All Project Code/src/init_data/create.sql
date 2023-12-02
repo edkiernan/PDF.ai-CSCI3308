@@ -19,9 +19,9 @@ CREATE TABLE IF NOT EXISTS users_to_pdf (
   FOREIGN KEY (pdf_id) REFERENCES pdf (pdf_id) ON DELETE CASCADE
 );
 
-INSERT INTO users (username, password, email) VALUES ('ek3', 'password123', 'ekthree@gmail.com');
-INSERT INTO users (username, password, email) VALUES ('coinflip', 'complexpw', 'frankthetank@yahoo.com');
-INSERT INTO users (username, password, email) VALUES ('profeggman','collectrings','eggman@colorado.edu');
+INSERT INTO users (username, password, email) VALUES ('ek3', '$2b$10$/plRtsCxi1yWpr0ewJKHIObRozHefkmC.E9Zls1tVOsCJJs1wfe92', 'ekthree@gmail.com'); /*password123 = $2b$10$/plRtsCxi1yWpr0ewJKHIObRozHefkmC.E9Zls1tVOsCJJs1wfe92*/
+INSERT INTO users (username, password, email) VALUES ('coinflip', '$2b$10$1JDHdnVnZ.h.Jd3k1eo7J.V37glQLWD.ezIfe87k8cvr1gtOYlRhy', 'frankthetank@yahoo.com'); /*complexpw = $2b$10$1JDHdnVnZ.h.Jd3k1eo7J.V37glQLWD.ezIfe87k8cvr1gtOYlRhy*/
+INSERT INTO users (username, password, email) VALUES ('profeggman','$2b$10$uhEipulxFFM2Nq1XWD.pGO2Fw6XrcGF0jq/DNGOQkmuHA.c29NJ0i','eggman@colorado.edu'); /*collectrings = $2b$10$uhEipulxFFM2Nq1XWD.pGO2Fw6XrcGF0jq/DNGOQkmuHA.c29NJ0i*/
 
 INSERT INTO pdf (name) VALUES ('test.pdf');
 INSERT INTO pdf (name) VALUES ('discrete.pdf');

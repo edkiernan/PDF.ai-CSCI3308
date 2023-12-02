@@ -1,5 +1,5 @@
 // Imports the index.js file to be tested.
-const server = require('../index'); //TO-DO Make sure the path to your index.js is correctly added
+const server = require('../index.js'); //TO-DO Make sure the path to your index.js is correctly added
 // Importing libraries
 
 // Chai HTTP provides an interface for live integration testing of the API's.
@@ -26,58 +26,58 @@ describe('Server!', () => {
   // ===========================================================================
   // Lab 11
   // Part A Login 
-  it('Postive : /login', done => {
+
+  // Positive Test Case for /login
+  it('Positive: /login - Successful Login', done => {
     chai
       .request(server)
       .post('/login')
-      .send({username: 'ek3', password: 'password'})
-      .expect(302) // Expecting a redirect status code (302)
-      .expect('Location', '/app') // Checking if the redirect location is '/app'
+      .send({ email: 'ekthree@gmail.com', password: 'password123' })
       .end((err, res) => {
-        expect(res).to.have.status(302);
-        expect(res.header.location).to.equal('/app');
+        expect(res).to.have.status(200); // Assuming a successful login returns a 200 status
+        expect(res).to.redirect; // Expecting a redirect to /app
         done();
       });
   });
 
-  it('Negative : /login', done => {
+  // Negative Test Case for /login
+  it('Negative: /login - Invalid Credentials', done => {
     chai
-      .request(server)
-      .post('/login')
-      .send({username: 'ek3', password: 22})
-      .end((err, res) => {
-        expect(res).to.have.status(200);
-        expect(res.body.message).to.equals('An error occurred. Please try again.');
-        done();
-      });
+    .request(server)
+    .post('/login')
+    .send({ email: 'ekthree@gmail.com', password: 'wrongpassword' }) // Use an incorrect password
+    .end((err, res) => {
+      expect(res).to.have.status(200); // Assuming the endpoint returns a 200 status for failed login attempts
+      expect(res.text).to.include('Incorrect password. Try again'); // Verify the error message
+      done();
+    });
   });
 
-  // Part B Register 
-  //We are checking POST /register API by passing the user info in the correct order. This test case should pass and return a status 200 along with a "Success" message.
-  //Positive cases
-  it('Positive : /register', done => {
-    chai
-      .request(server)
-      .post('/register')
-      .send({username: 'ek3', password: 'password', email: 'ekthree@gmail.com'})
-      .expect(302) // Expecting a redirect status code (302)
-      .expect('Location', '/login') // Checking if the redirect location is '/app'
-      .end((err, res) => {
-        expect(res).to.have.status(302);
-        expect(res.header.location).to.equal('/login');
-        done();
-      });
-  });
-
-  //We are checking POST /register API by passing the user info in in incorrect manner (password cannot be an integer). This test case should pass and return a status 200 along with a "Invalid input" message.
-  it('Negative : /register. Checking invalid username', done => {
+    // Part B Register 
+    // We are checking POST /register API by passing the user info in the correct order. This test case should pass and return a status 200 along with a "Success" message.
+    // Positive Test Case for /register
+  it('Positive: /register - Successful Registration', done => {
     chai
       .request(server)
       .post('/register')
-      .send({username: 'ek3', password: 22, email: 'ekthree@gmail.com'})
+      .send({ username: 'newuser', password: 'newpassword', email: 'newuser@example.com' })
       .end((err, res) => {
-        expect(res).to.have.status(200);
-        expect(res.body.message).to.equals('Invalid input');
+        expect(res).to.have.status(200); // Assuming a successful registration returns a 200 status
+        expect(res.text).to.include('Registered successfully! Please log in.'); // Verify the rendered message
+        expect(res.text).to.not.include('Error:'); // Ensure no error message is included
+        done();
+      });
+  });
+
+  // Negative Test Case for /register
+  it('Negative: /register - Invalid Input', done => {
+    chai
+      .request(server)
+      .post('/register')
+      .send({ username: 'testuser', email: 'test@example.com' }) // Incomplete data, missing password
+      .end((err, res) => {
+        expect(res).to.have.status(200); // Assuming the endpoint returns a 200 status for failed registration attempts
+        expect(res.text).to.include('Please fill in all fields.'); // Verify the error message for incomplete data
         done();
       });
   });
