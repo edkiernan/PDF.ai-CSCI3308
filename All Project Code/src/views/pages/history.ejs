@@ -1,33 +1,25 @@
 <%- include ('../partials/header') %> 
 <%- include ('../partials/menu') %>
+<div style="margin: 1vw;">
+    <h3 style="margin-left: 0.5vw;">Upload a PDF</h3>
+    <div id = "upload">
+        <%- include ('../partials/upload.ejs') %>
+    </div>
+    <% if (locals.userFiles.length > 0) { %>
+        <h3 style="margin-top: 4vh; margin-left: 0.5vw;">History</h3>
+        <div id = "history">
+            <% userFiles.forEach(function(file){ %>
+                <div class="card" style="width: 18rem; margin: 0.5vw; border-radius: calc(8px + 0.3vw);">
+                    <div class="card-body">
+                        <h5 class="card-title"><%= file.fileName %></h5>
+                        <p class="card-text">Uploaded on: <%= file.uploadDate %></p>
+                        <a href="/app/<%= encodeURIComponent(file.fileName) %>" class="btn btn-primary hoverable" style="background-color: #BECEEB; color: #313435; outline: none !important;">Select</a>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+    <% } %>
+</div>
 
-<main>
- <div class="container">
-    <%- include ('../partials/upload') %>
-
-   <h1><center>View Past Uploads</center></h1>
-
-   <style>
-     table {
-       width: 100%;
-       border-collapse: collapse;
-     }
-     th, td {
-       border: 1px solid black;
-       padding: 15px;
-       text-align: left;
-     }
-   </style>
-   <table>
-     <tr>
-       <th>PDF</th>
-     </tr>
-     <tr>
-       <td><%= file_name %></td>
-       <td>open button</td>
-     </tr>
-   </table>
- </div>
-</main>
 
 <%- include ('../partials/footer') %>

@@ -1,12 +1,14 @@
 :root {
-    --light-nav-color: #e0e3e4;
+    --light-nav-color: #e4e5e6;
     --dark-nav-color: #3b3e3f;
-    --light-nav-hover-color: #C8DED8;
+    --light-nav-hover-color: #BECEEB;
     --dark-nav-hover-color: #65706D;
-    --light-container-highlight-color : #D8F0E9;
+    --light-container-highlight-color : #BECEEB;
     --dark-container-highlight-color : #65706D;
-    --light-button-highlight-color : #C1D6D0;
+    --light-button-highlight-color : #cdbed6;
     --dark-button-highlight-color : #9EB0AB;
+    --user-message-color: #d8dbf2;
+    --bot-message-color: #d8dbf2;
     --nav-color: var(--light-nav-color);
     --nav-hover-color: var(--light-nav-hover-color);
     --container-highlight-color: var(--light-container-highlight-color);
@@ -14,6 +16,14 @@
     --dark-background-color: #313435;
     --light-background-color: #eef1f2;
 }
+
+/* 
+81717A
+9D8CA1
+9993B2
+A7ABDD
+B4D4EE
+*/
 
 body {
     color: #313435;
@@ -108,6 +118,14 @@ button:disabled {
     width: 100%;
 }
 
+#error {
+    margin: 1vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--nav-color);
+}
+
 #messages {
     height: 98%;
     overflow-x: auto;
@@ -163,7 +181,7 @@ input:disabled {
 }
 
 .user-message {
-    background-color: var(--light-container-highlight-color);
+    background-color: var(--user-message-color);
     color: var(--dark-background-color);
     display: flex;
     flex-direction: column;
@@ -181,7 +199,7 @@ input:disabled {
 }
 
 .bot-message {
-    background-color: var(--container-highlight-color);
+    background-color: var(--bot-message-color);
     flex-direction: column;
     padding: 1.5% 2.72% 1.5% 2.1%;
 }
@@ -192,5 +210,24 @@ input:disabled {
 }
 
 .no-context {
-    background-color: red;
+    background-color: #ECAFB8;
+}
+
+#upload {
+    /* margin: 1vw; */
+    padding: 1vw;
+    background-color: var(--nav-color);
+    border-radius: calc(10px + 1.1vw);
+}
+
+#upload button {
+    border-radius: calc(8px + 0.3vw);
+}
+
+#history {
+    /* margin: 1vw; */
+    padding: 0.5vw;
+    background-color: var(--nav-color);
+    border-radius: calc(10px + 1.1vw);
+    display: flex;
 }
