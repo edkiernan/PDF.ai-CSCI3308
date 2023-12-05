@@ -41,7 +41,7 @@ body {
     background-color: var(--nav-color);
     padding: 1.5%;
     border-radius: calc(10px + 1.1vw);
-    width: auto;
+    width: 50vw;
 }
 
 #pdf-element {
@@ -70,7 +70,7 @@ button:disabled {
     background-color: var(--nav-color);
     padding: 1.5%;
     border-radius: calc(10px + 1.1vw);
-    width: 60vw;
+    width: auto;
 }
 
 #pdf-container input {
