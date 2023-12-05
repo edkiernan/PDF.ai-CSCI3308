@@ -270,10 +270,22 @@ app.get('/app/:fileName', auth, async (req, res) => {
 
 app.get('/history', auth, async (req, res) => {
     let userFiles = await listUserFiles(req.session.user.username);
+
+    // if there's a message in the query, then render history with the message
+    if (req.query.message) {
+        res.render('pages/history', { username: req.session.user.username, userFiles, message: req.query.message, error: req.query.error });
+        return;
+    }
+
     res.render('pages/history', { username: req.session.user.username, userFiles });
 });
 
 app.post('/upload-pdf', upload.single('pdfFile'), async (req, res) => {
+    // if no file is uploaded, then render history with an error message
+    if (!req.file) {
+        let userFiles = await listUserFiles(req.session.user.username);
+        return res.redirect('/history?message=Please upload a PDF file&error=true');
+    }
     try {
         await uploadPDF(req.file, req.session.user.username);
         // res.status(200).json({ message: 'File uploaded and stored successfully!', fileName: req.file.originalname });
@@ -444,7 +456,11 @@ app.get("/logout", (req, res) => {
 });
 
 app.get('/settings', (req, res) => {
-    res.render('pages/settings');
+    res.render('pages/settings', { username: req.session.user.username, email: req.session.user.email });
+});
+
+app.get('/howTo', (req, res) => {
+    res.render('pages/howTo', { username: req.session.user.username })
 });
 
 // *****************************************************

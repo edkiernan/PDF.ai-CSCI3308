@@ -1,17 +1,16 @@
 <%- include ('../partials/header') %> 
 <%- include ('../partials/menu') %>
 
-
 <div id = "upload">
     <%- include ('../partials/upload.ejs') %>
 </div>
 <div id = "history">
     <% userFiles.forEach(function(file){ %>
-        <div class="card" style="width: 18rem; margin: 0.5vw; ">
+        <div class="card" style="width: 18rem; margin: 0.5vw; border-radius: calc(8px + 0.3vw);">
             <div class="card-body">
                 <h5 class="card-title"><%= file.fileName %></h5>
                 <p class="card-text">Uploaded on: <%= file.uploadDate %></p>
-                <a href="/app/<%= encodeURIComponent(file.fileName) %>" class="btn btn-primary">Select</a>
+                <a href="/app/<%= encodeURIComponent(file.fileName) %>" class="btn btn-primary hoverable" style="background-color: #BECEEB; color: #313435; outline: none !important;">Select</a>
             </div>
         </div>
     <% }) %>

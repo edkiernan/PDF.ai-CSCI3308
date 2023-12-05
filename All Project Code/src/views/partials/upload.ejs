@@ -7,6 +7,11 @@
             <label for="formFile" class="form-label">Upload File</label>
             <input class="form-control" type="file" id="formFile" name="pdfFile">
         </div>
-        <button type="submit" class="hoverable">Upload</button>
+        <div style="display: flex;">
+            <button type="submit" class="hoverable">Upload</button>
+            <% if (locals.error) { %>
+                <p id="error"><%= message %></p>
+            <% } %>
+        </div>
     </form>
 </header>

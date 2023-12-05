@@ -1,14 +1,14 @@
 :root {
-    --light-nav-color: #e0e3e4;
+    --light-nav-color: #e4e5e6;
     --dark-nav-color: #3b3e3f;
-    --light-nav-hover-color: #C8DED8;
+    --light-nav-hover-color: #BECEEB;
     --dark-nav-hover-color: #65706D;
-    --light-container-highlight-color : #B4D4EE;
+    --light-container-highlight-color : #BECEEB;
     --dark-container-highlight-color : #65706D;
-    --light-button-highlight-color : #C1D6D0;
+    --light-button-highlight-color : #cdbed6;
     --dark-button-highlight-color : #9EB0AB;
-    --user-message-color: #E6F1F9;
-    --bot-message-color: #E6F1F9;
+    --user-message-color: #d8dbf2;
+    --bot-message-color: #d8dbf2;
     --nav-color: var(--light-nav-color);
     --nav-hover-color: var(--light-nav-hover-color);
     --container-highlight-color: var(--light-container-highlight-color);
@@ -118,6 +118,14 @@ button:disabled {
     width: 100%;
 }
 
+#error {
+    margin: 1vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--nav-color);
+}
+
 #messages {
     height: 98%;
     overflow-x: auto;
@@ -202,7 +210,7 @@ input:disabled {
 }
 
 .no-context {
-    background-color: red;
+    background-color: #ECAFB8;
 }
 
 #upload {
