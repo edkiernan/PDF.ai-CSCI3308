@@ -71,7 +71,7 @@ app.use(express.static(__dirname + '/public'));
 // ****************************************************
 
 
-// from lab 11
+// from lab 11, simply api to test server start up
 app.get('/welcome', (req, res) => {
     res.json({ status: 'success', message: 'Welcome!' });
 });
