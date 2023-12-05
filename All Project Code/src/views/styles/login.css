@@ -1,5 +1,5 @@
 body {
-    background-color: lightgreen;
+    background-color: #B1BFA3;
 }
 
 .login_button {
@@ -7,6 +7,6 @@ body {
 }
 
 .login_button:hover {
-    background-color: #04AA6D;
+    background-color: #68735D;
     color: white;
 }
