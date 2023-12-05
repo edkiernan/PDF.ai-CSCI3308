@@ -418,6 +418,16 @@ app.get("/logout", (req, res) => {
     res.render('pages/login', { message: `Logged out successfully` });
 });
 
+// Route to redirect to login
+app.get('/', (req, res) => {
+    res.redirect('/settings');
+});
+
+//Get for login
+app.get('/login', (req, res) => {
+    res.render('pages/settings');
+});
+
 // *****************************************************
 // <!-- Section 3 : Start Server-->
 // *****************************************************
