@@ -77,7 +77,7 @@ const listUserFiles = async (username) => {
         return fileDetails;
     } catch (error) {
         console.error('Error retrieving file list:', error);
-        throw new Error('An error occurred while retrieving the file list.');
+        return [];
     }
 };
 

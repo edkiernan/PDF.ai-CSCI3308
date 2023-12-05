@@ -40,9 +40,9 @@ body {
   
 #container {
     display: flex;
-    height: 100vh; 
-    margin: 10px 0px;
-    padding: 1vw
+    height: 105vh; 
+    padding: 1vw;
+    padding-top: 0;
 }
 
 .content-padding {
@@ -61,7 +61,7 @@ body {
 
 #pdf-element {
     overflow-y: auto;
-    height: 92%;
+    height: 90%;
 }
 
 button {
@@ -111,7 +111,7 @@ button:disabled {
 
 #chat {
     animation: fade-in 0.5s ease-in;
-    height: 86%;
+    height: 73vh;
 }
 
 .generate {
@@ -205,8 +205,7 @@ input:disabled {
 }
 
 #chat-elements {
-    margin: 2% 0;
-    padding: 0;
+    margin-bottom: 2%;
 }
 
 .no-context {
