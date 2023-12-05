@@ -50,8 +50,41 @@ const downloadPDF = async (fileName, username) => {
     }
 };
 
+const listUserFiles = async (username) => {
+    const prefix = `pdf_uploads/${username}/`;
+
+    try {
+        const [files] = await storage.bucket(bucketName).getFiles({ prefix });
+
+        const fileDetails = await Promise.all(files.map(async (file) => {
+            const fileName = file.name.split('/').pop();
+            const [metadata] = await file.getMetadata();
+            
+            // Create a new Date instance using the ISO-formatted upload date
+            const uploadDateISO = new Date(metadata.updated);
+
+            // Format date to "mm/dd/yy"
+            const uploadDate = uploadDateISO.toLocaleDateString('en-US', {
+                year: '2-digit',
+                month: '2-digit',
+                day: '2-digit'
+            });
+
+            return { fileName, uploadDate };
+        }));
+
+        // console.log('Files in user folder:', fileDetails);
+        return fileDetails;
+    } catch (error) {
+        console.error('Error retrieving file list:', error);
+        throw new Error('An error occurred while retrieving the file list.');
+    }
+};
+
+
 // export
 module.exports = {
     uploadPDF,
-    downloadPDF
+    downloadPDF,
+    listUserFiles,
 }
