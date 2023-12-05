@@ -214,7 +214,7 @@ input:disabled {
 }
 
 #upload {
-    margin: 1vw;
+    /* margin: 1vw; */
     padding: 1vw;
     background-color: var(--nav-color);
     border-radius: calc(10px + 1.1vw);
@@ -225,7 +225,7 @@ input:disabled {
 }
 
 #history {
-    margin: 1vw;
+    /* margin: 1vw; */
     padding: 0.5vw;
     background-color: var(--nav-color);
     border-radius: calc(10px + 1.1vw);
