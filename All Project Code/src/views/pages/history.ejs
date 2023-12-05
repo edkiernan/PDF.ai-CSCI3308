@@ -1,0 +1,33 @@
+<%- include ('../partials/header') %> 
+<%- include ('../partials/menu') %>
+
+<main>
+ <div class="container">
+    <%- include ('../partials/upload') %>
+
+   <h1><center>View Past Uploads</center></h1>
+
+   <style>
+     table {
+       width: 100%;
+       border-collapse: collapse;
+     }
+     th, td {
+       border: 1px solid black;
+       padding: 15px;
+       text-align: left;
+     }
+   </style>
+   <table>
+     <tr>
+       <th>PDF</th>
+     </tr>
+     <tr>
+       <td><%= file_name %></td>
+       <td>open button</td>
+     </tr>
+   </table>
+ </div>
+</main>
+
+<%- include ('../partials/footer') %>
