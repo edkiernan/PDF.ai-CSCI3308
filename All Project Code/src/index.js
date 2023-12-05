@@ -13,7 +13,7 @@ const upload = multer({ dest: 'uploads/' });
 
 
 const { createMessage, fetchChatCompletion } = require('./utilities/message.js');
-const { uploadPDF, downloadPDF } = require('./utilities/storageHandler.js');
+const { uploadPDF, downloadPDF, listUserFiles } = require('./utilities/storageHandler.js');
 const { getTextFromPage, getMaxNumPages } = require('./utilities/pdfUtil.js');
 
 // database configuration
@@ -111,7 +111,7 @@ app.post('/login', async (req, res) => {
             // res.render('pages/login', { message: 'Logged in successfully!', error: false });
             req.session.user = user;
             req.session.save();
-            res.redirect("/app");
+            res.redirect("/history");
         }
         else {
             throw new Error('Incorrect password. Try again');
@@ -238,6 +238,16 @@ const auth = (req, res, next) => {
 //     }
 // });
 
+app.get('/debug-get-user-files', async (req, res) => {
+    try {
+        const files = await listUserFiles("test_user");
+        res.status(200).json({ files });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('An error occurred while retrieving the file.');
+    }
+});
+
 // Authentication Required
 app.use(auth); // Uncomment outside of testing
 
@@ -246,14 +256,29 @@ app.use(auth); // Uncomment outside of testing
 // });
 
 app.get('/app', auth, async (req, res) => { // debugging
-    let fileName = "Text.pdf";
-    res.render('pages/app', { username: req.session.user.username, pageNumber: 1, fileName });
+    // let fileName = "Text.pdf";
+    // if there's no file name in the session, then redirect to /history page
+    if (!req.session.fileName) {
+        return res.redirect('/history');
+    }
+    res.render('pages/app', { username: req.session.user.username, pageNumber: 1, fileName: req.session.fileName });
+});
+
+app.get('/app/:fileName', auth, async (req, res) => {
+    res.render('pages/app', { username: req.session.user.username, pageNumber: 1, fileName: req.params.fileName });
+});
+
+app.get('/history', auth, async (req, res) => {
+    let userFiles = await listUserFiles(req.session.user.username);
+    res.render('pages/history', { username: req.session.user.username, userFiles });
 });
 
 app.post('/upload-pdf', upload.single('pdfFile'), async (req, res) => {
     try {
         await uploadPDF(req.file, req.session.user.username);
-        res.status(200).json({ message: 'File uploaded and stored successfully!', fileName: req.file.originalname });
+        // res.status(200).json({ message: 'File uploaded and stored successfully!', fileName: req.file.originalname });
+        req.session.fileName = req.file.originalname;
+        res.redirect('/app');
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'An error occurred while uploading the file.' });
@@ -418,13 +443,7 @@ app.get("/logout", (req, res) => {
     res.render('pages/login', { message: `Logged out successfully` });
 });
 
-// Route to redirect to login
-app.get('/', (req, res) => {
-    res.redirect('/settings');
-});
-
-//Get for login
-app.get('/login', (req, res) => {
+app.get('/settings', (req, res) => {
     res.render('pages/settings');
 });
 
