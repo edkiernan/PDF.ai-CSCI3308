@@ -13,12 +13,18 @@ PDF.ai is a pdf summarizing application in which users can upload a PDF to be su
 ## Technology Stack
 (TBD)
 ## Prerequisites to run the application
-(TBD)
+
 ## Instructions on how to run the application locally.
-(TBD)
+Running the application locally can be done using docker. To run the tests you must first have docker installed. Once it is ensured docker is installed we can run the apllication locally. Ensure you are in directory `PDF.ai-CSCI3308/All Project Code` and run the terminal command:
+```
+docker-compose up
+```
+Allow for the application to get up and running (should take no longer than ~30 seconds). Once application is up and the database is connected you can visit the running application at the link: http://localhost:3000/ \
+Once you are ready to shut down the application use `docker compose down` to shut down docker or `docker compose down -v` to shut down the containors.
+
 ## How to run the tests
 The automated tests are ran locally and are held in the in the server.spec.js file. 
-To run the tests you must first have docker installed. Once it is ensured docker is installed go to the docker-compose.yaml file in All Project Code/src. Under the part of the file that says "web" change the code from: 
+To run the tests you must first have docker installed. Once it is ensured docker is installed go to the docker-compose.yaml file in `PDF.ai-CSCI3308//All Project Code/src`. Under the part of the file that says "web" change the code from: 
 ```
 command: "npm start" 
 ```
