@@ -2,7 +2,7 @@
 Group 03 Project for CSCI3308
 
 ## Description
-PDF.ai is a pdf summarizing application in which users can upload a PDF to be summarized by an AI service. 
+PDF.ai is a pdf summarizing and explanation application in which users can upload a PDF to be summarized by Google's VertexAI. 
 ## Contributors
 * Eddie Kiernan
 * Amber Perillo
@@ -11,11 +11,20 @@ PDF.ai is a pdf summarizing application in which users can upload a PDF to be su
 * Helen Garabedian 
 * Justice Asamonye
 ## Technology Stack
-(TBD)
+* Node.js
+* Express.js
+* Google Cloud Storage
+* VertexAI
+* Bootstrap
+* EJS
+* CSS
+* HTML 
+* PostgreSQL
 ## Prerequisites to run the application
 In order to run the application the following files/folder must be added to directory `PDF.ai-CSCI3308/All Project Code` of the repository.
 1. .env
-```YAML .env
+The .env file will look similar to this but with your own google VertexAI credentials and google cloud database.
+```YAML /.env
 # database credentials
 POSTGRES_USER="postgres"
 POSTGRES_PASSWORD="pwd"
@@ -23,12 +32,25 @@ POSTGRES_DB="users_db"
 
 # Node vars
 SESSION_SECRET="super duper secret!"
-GOOGLE_APPLICATION_CREDENTIALS="./credentials/(vertexAI_google_information.json)"
-GCLOUD_STORAGE_BUCKET="csci3308-final-project-pdf"
+GOOGLE_APPLICATION_CREDENTIALS="./credentials/(yourgooglecreds.json)"
+GCLOUD_STORAGE_BUCKET="your-google-cloud-database"
 ```
-2. src/credentials/(vertexAI_google_information.json) 
+2. /src/credentials/name_of_googleinfo.json
+Your file in the credentials file will look similiar to this:
 ```json
-
+{
+  "type": "service_account",
+  "project_id": "",
+  "private_key_id": "",
+  "private_key": "",
+  "client_email": "",
+  "client_id": "",
+  "auth_uri": "",
+  "token_uri": "",
+  "auth_provider_x509_cert_url": "",
+  "client_x509_cert_url": "",
+  "universe_domain": ""
+}
 ```
 ## Instructions on how to run the application locally.
 Running the application locally can be done using docker. First ensure you have docker correctly installed. Once it is ensured docker is installed we can run the apllication locally. Ensure you are in directory `PDF.ai-CSCI3308/All Project Code` and run the terminal command:
