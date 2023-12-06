@@ -22,7 +22,7 @@ PDF.ai is a pdf summarizing and explanation application in which users can uploa
 * PostgreSQL
 ## Prerequisites to run the application
 In order to run the application the following files/folder must be added to directory `PDF.ai-CSCI3308/All Project Code` of the repository.
-1. .env
+1. Create .env
 * The .env file will look similar to this but with your own google VertexAI credentials and google cloud database.
 ```YAML /.env
 # database credentials
@@ -35,7 +35,7 @@ SESSION_SECRET="super duper secret!"
 GOOGLE_APPLICATION_CREDENTIALS="./credentials/(yourgooglecreds.json)"
 GCLOUD_STORAGE_BUCKET="your-google-cloud-database"
 ```
-2. /src/credentials/name_of_googleinfo.json \
+2. Create Service Account and create /src/credentials/name_of_googleinfo.json file \
 To get the JSON credentials for authenticating with the Google Cloud API, you need to create a service account and generate a key file in the Google Cloud Console. Here are the steps to do so:
     1. Go to the Google Cloud Console (https://console.cloud.google.com).
     2. Select or create a project where you want to access the Google Cloud Storage.
@@ -67,7 +67,17 @@ To get the JSON credentials for authenticating with the Google Cloud API, you ne
 ```
 Now that you have the JSON key file:
 
-* Use the path to this file in the GOOGLE_APPLICATION_CREDENTIALS environment in the .env file.
+* Use the path to this file in the GOOGLE_APPLICATION_CREDENTIALS environment in the .env file (yourgooglecreds.json).
+3. Create a Google Cloud Storage Bucket:
+    1. Go to the Google Cloud Console: https://console.cloud.google.com/.
+    2. Select your project or create a new one.
+    3.  Open the "Storage" section from the left-hand menu.
+    4. Click on "Create bucket".
+    5. Enter a globally unique name for your bucket (it must be unique across all Google Cloud Storage).
+    6. Select the location where you want to store your data.
+    7. Choose the default storage class (such as Standard, Nearline, Coldline, etc.).
+    8. Click "Create".
+    9. Once you've created the bucket, the name you assigned to it should be used as the value for GCLOUD_STORAGE_BUCKET in your .env file (your-google-cloud-database).
 ## Instructions on how to run the application locally.
 Running the application locally can be done using docker. First ensure you have docker correctly installed. Once it is ensured docker is installed we can run the apllication locally. Ensure you are in directory `PDF.ai-CSCI3308/All Project Code` and run the terminal command:
 ```
