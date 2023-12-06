@@ -23,7 +23,7 @@ PDF.ai is a pdf summarizing and explanation application in which users can uploa
 ## Prerequisites to run the application
 In order to run the application the following files/folder must be added to directory `PDF.ai-CSCI3308/All Project Code` of the repository.
 1. .env
-The .env file will look similar to this but with your own google VertexAI credentials and google cloud database.
+* The .env file will look similar to this but with your own google VertexAI credentials and google cloud database.
 ```YAML /.env
 # database credentials
 POSTGRES_USER="postgres"
@@ -35,8 +35,21 @@ SESSION_SECRET="super duper secret!"
 GOOGLE_APPLICATION_CREDENTIALS="./credentials/(yourgooglecreds.json)"
 GCLOUD_STORAGE_BUCKET="your-google-cloud-database"
 ```
-2. /src/credentials/name_of_googleinfo.json
-Your file in the credentials file will look similiar to this:
+2. /src/credentials/name_of_googleinfo.json \
+To get the JSON credentials for authenticating with the Google Cloud API, you need to create a service account and generate a key file in the Google Cloud Console. Here are the steps to do so:
+1. Go to the Google Cloud Console (https://console.cloud.google.com).
+2. Select or create a project where you want to access the Google Cloud Storage.
+3. Navigate to the "IAM & Admin" section, then select "Service accounts" from the sidebar.
+4. Click "Create Service Account" at the top of the page.
+5. Enter a name and description for the service account, and click "Create and Continue".
+6. Optionally assign roles to the service account based on the permissions it requires. For Google Cloud Storage, you might assign roles such as "Storage Object Admin" or "Storage Object Creator" for full or limited access respectively.
+7. Click "Done" to create the service account without granting users access to it (you can do this later if needed).
+8. After creating the service account, click on the email address of the service account in the list to go to its details page.
+9. In the "Keys" tab, click "Add Key" and choose "Create new key".
+10. Select "JSON" as the key type, and click "Create".
+11. A JSON key file will be created and downloaded to your computer. This file contains the service account's credentials that you'll use to authenticate your application.
+
+> For referrence your file should look like below but with your information filled in the quotes.
 ```json
 {
   "type": "service_account",
@@ -51,6 +64,9 @@ Your file in the credentials file will look similiar to this:
   "client_x509_cert_url": "",
   "universe_domain": ""
 }
+Now that you have the JSON key file:
+
+* Use the path to this file in the GOOGLE_APPLICATION_CREDENTIALS environment in the .env file.
 ```
 ## Instructions on how to run the application locally.
 Running the application locally can be done using docker. First ensure you have docker correctly installed. Once it is ensured docker is installed we can run the apllication locally. Ensure you are in directory `PDF.ai-CSCI3308/All Project Code` and run the terminal command:
