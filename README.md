@@ -13,13 +13,29 @@ PDF.ai is a pdf summarizing application in which users can upload a PDF to be su
 ## Technology Stack
 (TBD)
 ## Prerequisites to run the application
+In order to run the application the following files/folder must be added to directory `PDF.ai-CSCI3308/All Project Code` of the repository. /
+1. .env /
+```YAML
+# database credentials
+POSTGRES_USER="postgres"
+POSTGRES_PASSWORD="pwd"
+POSTGRES_DB="users_db"
 
+# Node vars
+SESSION_SECRET="super duper secret!"
+GOOGLE_APPLICATION_CREDENTIALS="./credentials/"vertexAI_google_information.json""
+GCLOUD_STORAGE_BUCKET="csci3308-final-project-pdf"
+```
+2. src/credentials/"vertexAI_google_information.json" /
+```
+
+```
 ## Instructions on how to run the application locally.
-Running the application locally can be done using docker. To run the tests you must first have docker installed. Once it is ensured docker is installed we can run the apllication locally. Ensure you are in directory `PDF.ai-CSCI3308/All Project Code` and run the terminal command:
+Running the application locally can be done using docker. First ensure you have docker correctly installed. Once it is ensured docker is installed we can run the apllication locally. Ensure you are in directory `PDF.ai-CSCI3308/All Project Code` and run the terminal command:
 ```
 docker-compose up
 ```
-Allow for the application to get up and running (should take no longer than ~30 seconds). Once application is up and the database is connected you can visit the running application at the link: http://localhost:3000/ \
+Allow for the application to get up and running (should take no longer than ~30 seconds). Once application is up and the database is connected you can visit the running application at the link: http://localhost:3000/ \ \
 Once you are ready to shut down the application use `docker compose down` to shut down docker or `docker compose down -v` to shut down the containors.
 
 ## How to run the tests
