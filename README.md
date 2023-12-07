@@ -36,7 +36,7 @@ GOOGLE_APPLICATION_CREDENTIALS="./credentials/yourgooglecreds.json"
 GCLOUD_STORAGE_BUCKET="your-google-cloud-database"
 ```
 > NOTE: You will edit the `yourgooglecreds.json` and the `your-google-cloud-database` parts of your .env file in the upcoming sections. 
-2. Create Service Account and create /src/credentials/name_of_googleinfo.json file \
+2. Create Service Account and create `/src/credentials/name_of_googleinfo.json` folder/file \
 To get the JSON credentials for authenticating with the Google Cloud API, you need to create a service account and generate a key file in the Google Cloud Console. Here are the steps to do so:
     1. Go to the Google Cloud Console (https://console.cloud.google.com).
     2. Select or create a project where you want to access the Google Cloud Storage.
@@ -49,6 +49,8 @@ To get the JSON credentials for authenticating with the Google Cloud API, you ne
     9. In the "Keys" tab, click "Add Key" and choose "Create new key".
     10. Select "JSON" as the key type, and click "Create".
     11. A JSON key file will be created and downloaded to your computer. This file contains the service account's credentials that you'll use to authenticate your application.
+    12. Now that you have the JSON key file create a credential folder in the `/src` directory and place your newely created JSON file inside.
+    13. Next you must edit your .env to use the path to this JSON file in the GOOGLE_APPLICATION_CREDENTIALS environment variable (replace `yourgooglecreds.json` witrh your file name).
 > For referrence your file should look like below but with your specific account information filled in the quotes.
 ```json
 {
@@ -65,8 +67,6 @@ To get the JSON credentials for authenticating with the Google Cloud API, you ne
   "universe_domain": ""
 }
 ```
-    12. Now that you have the JSON key file create a credential folder in the `/src` directory and place your newely created JSON file inside.
-    13. Next you must edit your .env to use the path to this JSON file in the GOOGLE_APPLICATION_CREDENTIALS environment variable (replace `yourgooglecreds.json` witrh your file name).
 
 3. Create a Google Cloud Storage Bucket:
     1. Go to the Google Cloud Console: https://console.cloud.google.com/.
