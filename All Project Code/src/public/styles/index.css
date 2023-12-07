@@ -43,6 +43,7 @@ body {
     height: 105vh; 
     padding: 1vw;
     padding-top: 0;
+    padding-bottom: 0;
 }
 
 .content-padding {
@@ -52,7 +53,7 @@ body {
 
 #pdf-container {
     flex: 1;
-    margin: 10px 10px 5% 0px;
+    margin: 10px 10px 3% 0px;
     background-color: var(--nav-color);
     padding: 1.5%;
     border-radius: calc(10px + 1.1vw);
@@ -81,14 +82,25 @@ button:disabled {
 
 #text-container {
     flex: 1;
-    margin: 10px 0px 5% 10px;
+    margin: 10px 0px 3% 10px;
     background-color: var(--nav-color);
     padding: 1.5%;
     border-radius: calc(10px + 1.1vw);
     width: auto;
+    padding-bottom: 0.8%;
 }
 
-#pdf-container input {
+#pdf-controls {
+    display: flex; /* Set the container to flexbox layout */
+    justify-content: space-between; /* This will place space evenly between child elements */
+    align-items: center; /* This will vertically center-align child elements */
+    padding: 10px; /* Add some padding around the controls */
+    box-sizing: border-box; /* This ensures that padding is included in total width */
+    width: 100%; /* Set the width to 100% of its parent */
+    /* Add additional styling as necessary */
+}
+
+#pdf-controls #input-page {
     margin: 0 1.3% 2% 0;
     border: 0;
     border-radius: calc(8px + 0.3vw);
@@ -98,6 +110,7 @@ button:disabled {
     color: inherit;
     transition: all 0.2s ease-out;
     width: 10%;
+    flex-grow: 1;
 }
 
 .hoverable:hover {
@@ -111,7 +124,12 @@ button:disabled {
 
 #chat {
     animation: fade-in 0.5s ease-in;
-    height: 73vh;
+    width: 100%;
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
 }
 
 .generate {
@@ -127,14 +145,25 @@ button:disabled {
 }
 
 #messages {
-    height: 98%;
+    flex-grow: 1; /* This will allow #messages to fill the available space */
     overflow-x: auto;
     scroll-behavior: smooth;
     scroll-margin-bottom: 10px;
     scroll-padding-bottom: 10px;
+    margin-bottom: 2%;
 }
 
-#chat input {
+
+#chat-elements {
+    box-sizing: border-box; 
+    /* bottom: 0;
+    left: 0;
+    right: 0; */
+    display: flex;
+    width: 100%; /* Ensure full width */
+}
+
+#chat-elements input {
     margin: 0 1.3% 2% 0;
     border: 0;
     border-radius: calc(8px + 0.3vw);
@@ -144,7 +173,20 @@ button:disabled {
     color: inherit;
     transition: all 0.2s ease-out;
     width: auto;
+    flex-grow: 1;
 }
+
+#chat-elements button {
+    margin-right: 1.3%; /* Consistent right margin for buttons */
+    padding: 1.2% 2.5%;
+    flex-shrink: 1; /* Allow buttons to shrink if necessary */
+}
+
+/* Remove margin for last child element to avoid unnecessary spacing on the edge */
+#chat-elements > :last-child {
+    margin-right: 0;
+}
+
 
 input:disabled {
     opacity: 0.4;
@@ -202,10 +244,6 @@ input:disabled {
     background-color: var(--bot-message-color);
     flex-direction: column;
     padding: 1.5% 2.72% 1.5% 2.1%;
-}
-
-#chat-elements {
-    margin-bottom: 2%;
 }
 
 .no-context {

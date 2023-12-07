@@ -18,14 +18,14 @@ const uploadPDF = async (file, username) => {
             destination: destination,
             metadata: { contentType: 'application/pdf' },
         });
-        console.log('File uploaded and stored successfully:', file.originalname);
+        // console.log('File uploaded and stored successfully:', file.originalname);
     } catch (error) {
         console.error('Error uploading file:', error);
     } finally {
         if (pdfFile) {
             try {
                 await fs.unlink(pdfFile);
-                console.log('Successfully deleted local file');
+                // console.log('Successfully deleted local file');
             } catch (error) {
                 console.error('Error deleting local file:', error);
             }

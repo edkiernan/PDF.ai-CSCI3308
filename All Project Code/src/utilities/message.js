@@ -44,7 +44,7 @@ const fetchChatCompletion = async (AIChatHistory, isSummary) => {
         "Content-Type": "application/json",
     };
 
-    console.log(AIChatHistory)
+    // console.log(AIChatHistory)
     let data;
     if (!isSummary) {
         // console.log("chat")
@@ -52,7 +52,7 @@ const fetchChatCompletion = async (AIChatHistory, isSummary) => {
             instances: [
                 {
                     // This context is different from the context in index.js. This context is guidance for the bot
-                    context: "Give response in HTML. Your job is to provide concise responses and answers to what the user asks. If the user is asking about the summary or content, prioritise answering with information given. Format responses to be as readible as possible, if there are sub topics/topics bold the name of the sub topic/topic.",
+                    context: "Your job is to provide concise responses and answers to what the user asks. If the user is asking about the summary or content, prioritise answering with information given. Format responses to be as readible as possible, respond in HTML.",
                     messages: AIChatHistory
                 },
             ],

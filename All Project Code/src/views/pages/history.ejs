@@ -9,7 +9,7 @@
         <h3 style="margin-top: 4vh; margin-left: 0.5vw;">History</h3>
         <div id = "history">
             <% userFiles.forEach(function(file){ %>
-                <div class="card" style="width: 18rem; margin: 0.5vw; border-radius: calc(8px + 0.3vw);">
+                <div class="card hoverable" style="width: 18rem; margin: 0.5vw; border-radius: calc(8px + 0.3vw);">
                     <div class="card-body">
                         <h5 class="card-title"><%= file.fileName %></h5>
                         <p class="card-text">Uploaded on: <%= file.uploadDate %></p>

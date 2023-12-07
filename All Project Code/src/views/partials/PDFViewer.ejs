@@ -1,8 +1,10 @@
-<button class="page-indicator" disabled>Page NA of NA</button>
-<button class="nav-button" id="previous-page">Previous Page</button>
-<button class="nav-button" id="next-page">Next Page</button>
-<input id="input-page" type="text" />
-<button class="nav-button" id="go-button">Go</button>
+<div id="pdf-controls">
+    <button class="page-indicator" >Page NA of NA</button>
+    <button class="nav-button" id="previous-page">Previous Page</button>
+    <button class="nav-button" id="next-page">Next Page</button>
+    <input id="input-page" type="text" placeholder="Jump"/>
+    <button class="nav-button" id="go-button">Go</button>
+</div>
 <div id="pdf-element">Loading PDF Document</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.js"></script>
@@ -67,8 +69,9 @@
 
         page.render(renderContext).promise.then(() => {
             if (!initialResize) {
-            resizePDF(pdfBuffer); // You may need to pass the pageNumber to resizePDF as well
-            initialResize = true;
+                updatePageIndicator();
+                resizePDF(pdfBuffer); // You may need to pass the pageNumber to resizePDF as well
+                initialResize = true;
             }
         });
         };
@@ -121,6 +124,7 @@
         if (pageNumber < maxNumPages) {
             pageNumber += 1;
             updatePageNumber();
+            updatePageIndicator();
             showPDFPage(pdfBuffer, pageNumber);
         }
         else {
@@ -133,6 +137,7 @@
         if (pageNumber > 1) {
             pageNumber -= 1;
             updatePageNumber();
+            updatePageIndicator();
             showPDFPage(pdfBuffer, pageNumber);
         }
         else {
@@ -148,6 +153,7 @@
         if (!isNaN(inputPage) && inputPage > 0 && inputPage <= maxNumPages) {
             pageNumber = inputPage;
             updatePageNumber();
+            updatePageIndicator();
             showPDFPage(pdfBuffer, pageNumber);
             // clear the input field
             document.getElementById('input-page').value = "";
