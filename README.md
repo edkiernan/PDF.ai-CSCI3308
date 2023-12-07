@@ -22,7 +22,7 @@ PDF.ai is a pdf summarizing and explanation application in which users can uploa
 * PostgreSQL
 ## Prerequisites to run the application
 In order to run the application the following files/folder must be added to directory `PDF.ai-CSCI3308/All Project Code` of the repository.
-1. Create .env
+1. Create .env file
 * The .env file will look similar to this but with your own google VertexAI credentials and google cloud database.
 ```YAML /.env
 # database credentials
@@ -32,9 +32,10 @@ POSTGRES_DB="users_db"
 
 # Node vars
 SESSION_SECRET="super duper secret!"
-GOOGLE_APPLICATION_CREDENTIALS="./credentials/(yourgooglecreds.json)"
+GOOGLE_APPLICATION_CREDENTIALS="./credentials/yourgooglecreds.json"
 GCLOUD_STORAGE_BUCKET="your-google-cloud-database"
 ```
+> NOTE: You will edit the `yourgooglecreds.json` and the `your-google-cloud-database` parts of your .env file in the upcoming sections. 
 2. Create Service Account and create /src/credentials/name_of_googleinfo.json file \
 To get the JSON credentials for authenticating with the Google Cloud API, you need to create a service account and generate a key file in the Google Cloud Console. Here are the steps to do so:
     1. Go to the Google Cloud Console (https://console.cloud.google.com).
@@ -48,8 +49,7 @@ To get the JSON credentials for authenticating with the Google Cloud API, you ne
     9. In the "Keys" tab, click "Add Key" and choose "Create new key".
     10. Select "JSON" as the key type, and click "Create".
     11. A JSON key file will be created and downloaded to your computer. This file contains the service account's credentials that you'll use to authenticate your application.
-
-> For referrence your file should look like below but with your information filled in the quotes.
+> For referrence your file should look like below but with your specific account information filled in the quotes.
 ```json
 {
   "type": "service_account",
@@ -65,9 +65,9 @@ To get the JSON credentials for authenticating with the Google Cloud API, you ne
   "universe_domain": ""
 }
 ```
-Now that you have the JSON key file:
+    12. Now that you have the JSON key file create a credential folder in the `/src` directory and place your newely created JSON file inside.
+    13. Next you must edit your .env to use the path to this JSON file in the GOOGLE_APPLICATION_CREDENTIALS environment variable (replace `yourgooglecreds.json` witrh your file name).
 
-* Use the path to this file in the GOOGLE_APPLICATION_CREDENTIALS environment in the .env file (yourgooglecreds.json).
 3. Create a Google Cloud Storage Bucket:
     1. Go to the Google Cloud Console: https://console.cloud.google.com/.
     2. Select your project or create a new one.
@@ -77,7 +77,7 @@ Now that you have the JSON key file:
     6. Select the location where you want to store your data.
     7. Choose the default storage class (such as Standard, Nearline, Coldline, etc.).
     8. Click "Create".
-    9. Once you've created the bucket, the name you assigned to it should be used as the value for GCLOUD_STORAGE_BUCKET in your .env file (your-google-cloud-database).
+    9. Once you've created the bucket, the name you assigned to it should be used as the value for GCLOUD_STORAGE_BUCKET in your .env file (replace `your-google-cloud-database` with the name of your database).
 ## Instructions on how to run the application locally.
 Running the application locally can be done using docker. First ensure you have docker correctly installed. Once it is ensured docker is installed we can run the apllication locally. Ensure you are in directory `PDF.ai-CSCI3308/All Project Code` and run the terminal command:
 ```
