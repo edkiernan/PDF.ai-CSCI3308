@@ -38,7 +38,7 @@ GCLOUD_STORAGE_BUCKET="your-google-cloud-database"
 > NOTE: You will edit the `yourgooglecreds.json` and the `your-google-cloud-database` parts of your .env file in the upcoming sections. 
 2. Create Service Account and create `/src/credentials/name_of_googleinfo.json` folder/file \
 To get the JSON credentials for authenticating with the Google Cloud API, you need to create a service account and generate a key file in the Google Cloud Console. Here are the steps to do so:
-    1. Go to the Google Cloud Console (https://console.cloud.google.com).
+    1. Go to the Google Cloud Console: https://console.cloud.google.com
     2. Select or create a project where you want to access the Google Cloud Storage.
     3. Navigate to the "IAM & Admin" section, then select "Service accounts" from the sidebar.
     4. Click "Create Service Account" at the top of the page.
@@ -50,7 +50,7 @@ To get the JSON credentials for authenticating with the Google Cloud API, you ne
     10. Select "JSON" as the key type, and click "Create".
     11. A JSON key file will be created and downloaded to your computer. This file contains the service account's credentials that you'll use to authenticate your application.
     12. Now that you have the JSON key file create a credential folder in the `/src` directory and place your newely created JSON file inside.
-    13. Next you must edit your .env to use the path to this JSON file in the GOOGLE_APPLICATION_CREDENTIALS environment variable (replace `yourgooglecreds.json` witrh your file name).
+    13. Next you must edit your .env to use the path to this JSON file in the GOOGLE_APPLICATION_CREDENTIALS environment variable (replace `yourgooglecreds.json` with your file name).
 > For referrence your file should look like below but with your specific account information filled in the quotes.
 ```json
 {
@@ -69,7 +69,7 @@ To get the JSON credentials for authenticating with the Google Cloud API, you ne
 ```
 
 3. Create a Google Cloud Storage Bucket:
-    1. Go to the Google Cloud Console: https://console.cloud.google.com/.
+    1. Go to the Google Cloud Console: https://console.cloud.google.com
     2. Select your project or create a new one.
     3.  Open the "Storage" section from the left-hand menu.
     4. Click on "Create bucket".
@@ -83,8 +83,7 @@ Running the application locally can be done using docker. First ensure you have 
 ```
 docker-compose up
 ```
-Allow for the application to get up and running (should take no longer than ~30 seconds). Once application is up and the database is connected you can visit the running application at the link: http://localhost:3000/ \ 
-Once you are ready to shut down the application use `docker compose down` to shut down docker or `docker compose down -v` to shut down the containors.
+Allow for the application to get up and running (should take no longer than ~30 seconds). Once application is up and the database is connected you can visit the running application at the link: http://localhost:3000/. Once you are ready to shut down the application use `docker compose down` to shut down docker or `docker compose down -v` to shut down docker and the containors.
 
 ## How to run the tests
 The automated tests are ran locally and are held in the in the server.spec.js file. 
